@@ -1,12 +1,18 @@
-BoxLayout:
+<SearchBar@BoxLayout>:
     size_hint: 1,None
-    height:50
+    height:35
     orientation:'horizontal'
-    pos:0,root.height-50
+    TextInput:
+        height: self.minimum_height
+        width: self.height
     TextInput
-    TextInput
-    Button
-    Button
+    Button:
+        id: search_button
+        size_hint:None,1
         text: 'Search->'
+        on_release: print(self.size_hint_max)
     Button
+        id: back_button
+        size_hint:None,1
         text: '<-Back'
+        on_release: print(self.size)
