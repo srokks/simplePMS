@@ -13,15 +13,18 @@ from PyQt5.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QComboBox,
-
+    QLabel,
+    QMessageBox,
 )
 from Guest import GuestCtrl, Guest
+
 
 
 class editGuest(QWidget, ):
     def __init__(self, gGuest=None):
         super().__init__()
         # ----
+        self.legGuestID = QLineEdit()
         self.guest_type_combo = QComboBox()
         self.cmbGGender = QComboBox()
         # ----
@@ -37,6 +40,7 @@ class editGuest(QWidget, ):
         self.leGState = QLineEdit()
         self.leGCountry = QLineEdit()
         # ----
+        self.legIdNumberLabel = QLabel("ID number:")
         self.leGIDNumber = QLineEdit()
         # ---- Main window properties
         self.setWindowTitle("Edit guest")
@@ -49,18 +53,52 @@ class editGuest(QWidget, ):
         self.initGuest(gGuest)
         self.addActionBtn()
 
+    def updatedMessageBox(self):
+        msg = QMessageBox()
+        msg.setText("Information updated")
+        msg.setStandardButtons(QMessageBox.Ok)
+        retval = msg.exec_()
+
+    def update_btn_on_click(self):
+        updated_guest = Guest()
+        updated_guest.gGuestID = int(self.legGuestID.text())
+        updated_guest.gFirstName = self.leGFirstName.text()
+        updated_guest.gLastName = self.leGLastName.text()
+        updated_guest.gAddress = self.leGAddress.text()
+        updated_guest.gAddress2 = self.leGAddress2.text()
+        updated_guest.gCity = self.leGCity.text()
+        updated_guest.gState = self.leGState.text()
+        updated_guest.gZipCode = self.leGZipCode.text()
+        updated_guest.gCountry = self.leGCountry.text()
+        updated_guest.gPhoneNumber = self.leGPhoneNumber.text()
+        updated_guest.gMailAddress = self.leGMailAddress.text()
+        #FIXME: gender na integer
+        updated_guest.gGender = '0'
+        updated_guest.gGuestType = self.guest_type_combo.currentIndex()
+        updated_guest.gIdNumber = self.leGIDNumber.text()
+        if GuestCtrl().updateGuestObj(updated_guest):
+            self.updatedMessageBox()
+            print("Updated")
+    def new_btn_on_click(self):
+        #TODO:new_btn logic
+        pass
+    def close_btn_on_click(self):
+        #TODO:close_btn logic
+        pass
     def addActionBtn(self):
         VLayout = QVBoxLayout()
 
         new_bnt = QPushButton()
         new_bnt.setText('New..')
+        new_bnt.clicked.connect(self.new_btn_on_click)
 
         change_btn = QPushButton()
         change_btn.setText('Change')
+        change_btn.clicked.connect(self.update_btn_on_click)
 
         close_btn = QPushButton()
         close_btn.setText('Close')
-
+        close_btn.clicked.connect(self.close_btn_on_click)
         VLayout.addWidget(new_bnt)
         VLayout.addWidget(change_btn)
         VLayout.addWidget(close_btn)
@@ -72,8 +110,14 @@ class editGuest(QWidget, ):
             pass
         else:
             # ----
-            self.guest_type_combo = QComboBox()
-            self.cmbGGender = QComboBox()
+            self.legGuestID.setText(str(gGuest.gGuestID))
+            #TODO: guest combo logic
+            #Guest type - 0 - Guest ; 1 - company;2 agent
+            self.guest_type_combo.setCurrentIndex(gGuest.gGuestType)
+
+            #TODO: gender combo logic
+            #Gender 0 male 1 female
+            self.cmbGGender.setCurrentIndex(int(gGuest.gGender))
             # ----
             self.leGFirstName.setText(gGuest.gFirstName)
             self.leGLastName.setText(gGuest.gLastName)
@@ -88,21 +132,30 @@ class editGuest(QWidget, ):
             self.leGCountry.setText(gGuest.gCountry)
             # ----
             self.leGIDNumber.setText(gGuest.gIdNumber)
+    def on_change_guestcmb(self):
+        if self.guest_type_combo.currentIndex() == 0 :
+            self.legIdNumberLabel.setText('ID number')
+        else:
+            self.legIdNumberLabel.setText('Cmp. number')
 
     def createForm(self):
         main_layout = QFormLayout()
-
+        # ----
         guest_type_strings = ['Guest', 'Company', 'Agent']
         self.guest_type_combo.addItems(guest_type_strings)
+        self.guest_type_combo.currentTextChanged.connect(self.on_change_guestcmb)
         # Todo:jak company or agent ukryć combo z gender
-
-        gender_strings = ['male', 'female']
+        # ----
+        gender_strings = ['Mr.', 'Mrs.']
         self.cmbGGender.addItems(gender_strings)
         # TODO:add separator
 
         # Todo:add separator
-
+        # ----
+        self.legGuestID.setEnabled(False)
+        main_layout.addRow(self.legGuestID)
         main_layout.addRow('Guest type', self.guest_type_combo)
+        main_layout.addRow('Gender:',self.cmbGGender)
         main_layout.addRow('First name:', self.leGFirstName)
         main_layout.addRow('Last name:', self.leGLastName)
         main_layout.addRow('Phone no.:', self.leGPhoneNumber)
@@ -115,10 +168,10 @@ class editGuest(QWidget, ):
         main_layout.addRow('City:', self.leGCity)
         main_layout.addRow('State:', self.leGState)
         main_layout.addRow('Country:', self.leGCountry)
-        # Todo: oddzielic sekcje jakims separatorem
-        # Todo:jak company albo agent zmienic opis dokumentu na nip
+        # Todo:add separator
 
-        main_layout.addRow('ID number', self.leGIDNumber)
+
+        main_layout.addRow(self.legIdNumberLabel, self.leGIDNumber)
 
         self.general_layout.addLayout(main_layout)
 
@@ -126,7 +179,7 @@ class editGuest(QWidget, ):
 if __name__ == "__main__":
     import sys
 
-    a = GuestCtrl().getGuestByID(12)
+    a = GuestCtrl().getGuestByID(101)
 
     app = QApplication(sys.argv)
     MainWindow = editGuest(a)
