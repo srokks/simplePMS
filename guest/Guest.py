@@ -81,14 +81,14 @@ class GuestCtrl:
         for pos,el in enumerate(guest.tbl_pattern[1:]):
             sql+=el+"='"+str(guest(pos+1))+"',"
         sql=sql[:-1]
-        sql+= " WHERE "+guest.tbl_pattern[0]+"='"+str(guest(0))+"';"
-        print(sql)
+        sql+= " WHERE "+guest.tbl_pattern[0]+"="+str(guest(0))+";"
+        # print(sql)
         try:
             self.cur.execute(sql)
             self.conn.commit()
-            return self.cur.lastrowid
+            return True
         except sqlite3.Error as Err:
-            print(Err)
+            print('***ERROR OCCURED***\n',Err)
 
     def getGuestByColName(self,col_name,key_word):
         pass
