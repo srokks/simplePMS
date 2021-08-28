@@ -18,9 +18,10 @@ from PyQt5.QtWidgets import (
 )
 from Guest import GuestCtrl, Guest
 
+#TODO: validacja wprowadzonych danych użyciem QlineEdit
 
 
-class editGuest(QWidget, ):
+class editGuest(QWidget):
     def __init__(self, gGuest=None):
         super().__init__()
         # ----
@@ -53,13 +54,7 @@ class editGuest(QWidget, ):
         self.initGuest(gGuest)
         self.addActionBtn()
 
-    def updatedMessageBox(self):
-        msg = QMessageBox()
-        msg.setText("Information updated")
-        msg.setStandardButtons(QMessageBox.Ok)
-        retval = msg.exec_()
-
-    def update_btn_on_click(self):
+    def getGuestFromForm(self):
         updated_guest = Guest()
         updated_guest.gGuestID = int(self.legGuestID.text())
         updated_guest.gFirstName = self.leGFirstName.text()
@@ -72,19 +67,30 @@ class editGuest(QWidget, ):
         updated_guest.gCountry = self.leGCountry.text()
         updated_guest.gPhoneNumber = self.leGPhoneNumber.text()
         updated_guest.gMailAddress = self.leGMailAddress.text()
-        #FIXME: gender na integer
+        # FIXME: gender na integer
         updated_guest.gGender = '0'
         updated_guest.gGuestType = self.guest_type_combo.currentIndex()
         updated_guest.gIdNumber = self.leGIDNumber.text()
-        if GuestCtrl().updateGuestObj(updated_guest):
+        return updated_guest
+
+    def updatedMessageBox(self):
+        msg = QMessageBox()
+        msg.setText("Information updated")
+        msg.setStandardButtons(QMessageBox.Ok)
+        retval = msg.exec_()
+
+    def update_btn_on_click(self):
+        if GuestCtrl().updateGuestObj(self.getGuestFromForm()):
             self.updatedMessageBox()
             print("Updated")
     def new_btn_on_click(self):
         #TODO:new_btn logic
-        pass
+        new_guest = self.getGuestFromForm()
+        new_guest.gGuestID = None
+        new_guest_id = GuestCtrl().addGuest(new_guest)
+
     def close_btn_on_click(self):
-        #TODO:close_btn logic
-        pass
+        self.close()
     def addActionBtn(self):
         VLayout = QVBoxLayout()
 
@@ -176,12 +182,13 @@ class editGuest(QWidget, ):
         self.general_layout.addLayout(main_layout)
 
 
-if __name__ == "__main__":
-    import sys
 
-    a = GuestCtrl().getGuestByID(101)
-
-    app = QApplication(sys.argv)
-    MainWindow = editGuest(a)
-    MainWindow.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     import sys
+#
+#     a = GuestCtrl().getGuestByID(101)
+#
+#     app = QApplication(sys.argv)
+#     MainWindow = editGuest(a)
+#     MainWindow.show()
+#     sys.exit(app.exec_())

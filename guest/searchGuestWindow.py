@@ -58,7 +58,7 @@ class searchGuest(QWidget):
         acion_layout = QVBoxLayout()
 
         close_btn = QPushButton("Close")
-        close_btn.clicked.connect(self.clearGuestGrid)
+        close_btn.clicked.connect(self.close)
 
         search_btn = QPushButton("Search")
         search_btn.clicked.connect(self.search_btn_onclick)
