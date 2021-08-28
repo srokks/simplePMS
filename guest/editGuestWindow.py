@@ -87,8 +87,8 @@ class editGuest(QWidget):
         #TODO:new_btn logic
         new_guest = self.getGuestFromForm()
         new_guest.gGuestID = None
-        new_guest_id = GuestCtrl().addGuest(new_guest)
-
+        new_guest.gGuestID = GuestCtrl().addGuest(new_guest)
+        self.initGuest(new_guest)
     def close_btn_on_click(self):
         self.close()
     def addActionBtn(self):
@@ -117,10 +117,9 @@ class editGuest(QWidget):
         else:
             # ----
             self.legGuestID.setText(str(gGuest.gGuestID))
-            #TODO: guest combo logic
             #Guest type - 0 - Guest ; 1 - company;2 agent
             self.guest_type_combo.setCurrentIndex(gGuest.gGuestType)
-
+            # Todo:jak company or agent ukryć combo z gender
             #TODO: gender combo logic
             #Gender 0 male 1 female
             self.cmbGGender.setCurrentIndex(int(gGuest.gGender))
@@ -150,7 +149,7 @@ class editGuest(QWidget):
         guest_type_strings = ['Guest', 'Company', 'Agent']
         self.guest_type_combo.addItems(guest_type_strings)
         self.guest_type_combo.currentTextChanged.connect(self.on_change_guestcmb)
-        # Todo:jak company or agent ukryć combo z gender
+
         # ----
         gender_strings = ['Mr.', 'Mrs.']
         self.cmbGGender.addItems(gender_strings)
@@ -183,12 +182,12 @@ class editGuest(QWidget):
 
 
 
-# if __name__ == "__main__":
-#     import sys
-#
-#     a = GuestCtrl().getGuestByID(101)
-#
-#     app = QApplication(sys.argv)
-#     MainWindow = editGuest(a)
-#     MainWindow.show()
-#     sys.exit(app.exec_())
+if __name__ == "__main__":
+    import sys
+
+    a = GuestCtrl().getGuestByID(101)
+
+    app = QApplication(sys.argv)
+    MainWindow = editGuest()
+    MainWindow.show()
+    sys.exit(app.exec_())
