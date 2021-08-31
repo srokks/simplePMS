@@ -17,9 +17,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from Guest import GuestCtrl, Guest
-
 from editGuestWindow import editGuest
 from searchGuestWindow import searchGuest
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
