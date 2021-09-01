@@ -1,6 +1,8 @@
 import sqlite3
+from Address import Address,AddressCtrl
+
 class Guest:
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         '''
             gGuestID',
             'gGuestType',int, 0 - guest, 1 - comp., 2 - agent
@@ -32,8 +34,9 @@ class Guest:
             Used to init instance from db fetched data.
             '''
             self.gGuestList = kwargs['gGuestList']
-
-            if len(self.gGuestList)!=len(self.tbl_pattern):
+            if self.gGuestList == None:
+                print('*DATABASE EROOR INTEGRITY*')
+            if len(self.gGuestList) != len(self.tbl_pattern):
                 raise Exception("DATABASE INTEGRITY ERROR")
             else:
                 self.gGuestID = self.gGuestList[0]
@@ -62,11 +65,14 @@ class Guest:
             self.FamilyMemberID = kwargs['FamilyMemberIDs'] if 'FamilyMemberIDs' in kwargs.keys() else []
             self.gAddressID = kwargs['gAddressID'] if 'gAddressID' in kwargs.keys() else None
 
-    def __call__(self,*args,**kwargs):
+    def __call__(self, *args, **kwargs):
         if not args:
-            print(self.gGuestID, self.gGuestType, self.gGender, self.gFirstName, self.gLastName, self.gPhoneNumber, self.gMailAddress, self.gIdNumber, self.FamilyMemberID, self.gAddressID, sep="|")
-    def addFamilyMember(self,gFamilyMemberID):
-        self.FamilyMemberID+=a
+            print(self.gGuestID, self.gGuestType, self.gGender, self.gFirstName, self.gLastName, self.gPhoneNumber,
+                  self.gMailAddress, self.gIdNumber, self.FamilyMemberID, self.gAddressID, sep="|")
+            self.address = AddressCtrl().get_by_id(self.gAddressID) if AddressCtrl().get_by_id(self.gAddressID)!=False else Address()
+            if self.address!=None:
+                self.address()
+
 class GuestCtrl:
     __database_name = r'test_db.db'
 
@@ -74,6 +80,7 @@ class GuestCtrl:
         self.conn = sqlite3.connect(self.__database_name)
         self.cur = self.conn.cursor()
         self.tbl_name = 'tblGuest'
+        self.tbl_pattern = Guest().tbl_pattern.copy()
     def create_table(self):
         sql = (
             "CREATE TABLE IF NOT EXISTS 'tblGuest' ("
@@ -95,21 +102,36 @@ class GuestCtrl:
         except sqlite3.Error as Err:
             print(Err)
 
-    def getByID(self, g_id):
+    def check_id(self, g_id):
         try:
-            #FixMe: does not check max id in tableś
             sql = f"SELECT * FROM {self.tbl_name} where {Guest().tbl_pattern[0]}='{g_id}'"
             self.cur.execute(sql)
-            guest_list = self.cur.fetchone()
-            return Guest(gGuestList=guest_list)
-
+            if self.cur.fetchone() == None:
+                return False
+            else:
+                return True
         except sqlite3.Error as Err:
             print(Err)
             return False
 
+    def get_by_id(self, g_id):
+        if self.check_id(g_id):
+            try:
+                sql = f"SELECT * FROM {self.tbl_name} where {self.tbl_pattern[0]}='{g_id}'"
+                self.cur.execute(sql)
+
+                guest_list = self.cur.fetchone()
+                return Guest(gGuestList=guest_list)
+
+            except sqlite3.Error as Err:
+                print(Err)
+                return False
+        else:
+            return False
+
     def add(self, guest):
         sql = (
-            f"INSERT INTO {self.tbl_name} ({','.join(Guest().tbl_pattern[1:])}) "
+            f"INSERT INTO {self.tbl_name} ({','.join(self.tbl_pattern[1:])}) "
             f"VALUES ("
             f"'{guest.gGuestType}',"
             f"'{guest.gGender}',"
@@ -118,7 +140,7 @@ class GuestCtrl:
             f"'{guest.gPhoneNumber}',"
             f"'{guest.gMailAddress}',"
             f"'{guest.gIdNumber}',"
-            f"'{guest.FamilyMemberID}'," 
+            f"'{guest.FamilyMemberID}',"
             f"'{guest.gAddressID}')"
         )
         try:
@@ -128,3 +150,75 @@ class GuestCtrl:
         except sqlite3.Error as Err:
             print(sql)
             print('ERROR OCCURED:', Err)
+
+    def get_members_of_guest(self, g_id):
+        try:
+            sql = f"SELECT gFamilyMemberID from {self.tbl_name} WHERE {self.tbl_pattern[0]}='{g_id}'"
+            self.cur.execute(sql)
+            return self.cur.fetchone()[0]
+        except sqlite3.Error as Err:
+            print(Err)
+            return False
+
+    def add_member_to_guest(self, mem, g_id):
+        try:
+            mem = str(mem)
+            g_id = str(g_id)
+            sg_members = self.get_members_of_guest(g_id)
+            if sg_members == '':
+                sg_members = []
+            else:
+                sg_members = sg_members.split(',')
+            sg_members.append(mem)
+            sg_members = ','.join(sg_members)
+
+            sql = f"UPDATE {self.tbl_name} SET {self.tbl_pattern[8]}='{sg_members}' WHERE {self.tbl_pattern[0]}='{g_id}'"
+            # print(sql)
+
+            # ---
+            self.cur.execute(sql)
+            self.conn.commit()
+
+
+
+        except sqlite3.Error as Err:
+            print(Err)
+            return False
+
+    def addFamilyMember(self, sg_id, fg_id):
+        if self.check_id(sg_id) and self.check_id(fg_id):
+            self.add_member_to_guest(fg_id, sg_id)
+            self.add_member_to_guest(sg_id, fg_id)
+            return True
+        else:
+            return False
+
+    def add_address(self,g_id,a_id):
+        if AddressCtrl().check_id(a_id) and self.check_id(g_id):
+            try:
+                sql = f"UPDATE {self.tbl_name} SET {self.tbl_pattern[9]}='{a_id}' WHERE {self.tbl_pattern[0]}='{g_id}'"
+                self.cur.execute(sql)
+                self.conn.commit()
+                # print(sql)
+                return True
+            except sqlite3.Error as Err:
+                print(Err)
+                return False
+        else:
+            return False
+    def get_attribute_by_id(self,g_id,param):
+        if param in self.tbl_pattern and self.check_id(g_id):
+            try:
+                sql = f"SELECT {self.tbl_pattern[self.tbl_pattern.index(param)]} FROM {self.tbl_name} WHERE {self.tbl_pattern[0]}='{g_id}'"
+                print(sql)
+                self.cur.execute(sql)
+                a = self.cur.fetchone()
+                print(a)
+                return True
+
+            except sqlite3.Error as Err:
+                print(Err)
+                return False
+        else:
+            return False
+GuestCtrl().get_attribute_by_id(99,'gLastName')
