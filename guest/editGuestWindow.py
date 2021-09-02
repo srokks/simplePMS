@@ -265,7 +265,6 @@ if __name__ == "__main__":
     import sys
 
     con = Controller()
-    a = con.get_by_id(5)
     app = QApplication(sys.argv)
     MainWindow = editGuest()
     MainWindow.show()
