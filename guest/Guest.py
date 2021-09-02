@@ -31,7 +31,7 @@ class Address:
         self.State = ''
         self.ZipCode = ''
         self.Country = ''
-        if 'aList' in kwargs.keys():
+        if 'aList' in kwargs.keys() and kwargs['aList']!=None:
             self.AddressID = kwargs['aList'][0]
             self.Address = kwargs['aList'][1]
             self.Address2 = kwargs['aList'][2]
@@ -86,7 +86,7 @@ class Guest:
             Address.__init__(self, aList=kwargs['aList'])
         else:
             Address.__init__(self)
-        if 'gList' in kwargs.keys():
+        if 'gList' in kwargs.keys() and kwargs['gList']!=None:
             gList = kwargs['gList']
             self.GuestID = gList[0]
             self.GuestType = gList[1]
@@ -100,9 +100,9 @@ class Guest:
             self.AddressID = gList[9]
 
     def __call__(self, *args, **kwargs):
-        print(self.GuestID, self.FirstName, self.LastName, self.PhoneNumber, self.MailAddress, self.IdNumber,
+        print('GUEST',self.GuestID, self.FirstName, self.LastName, self.PhoneNumber, self.MailAddress, self.IdNumber,
               self.FamilyMemberID, self.AddressID, sep="|")
-        print(self.AddressID,self.Address, self.Address2, self.City, self.State, self.ZipCode, self.Country, sep='|')
+        print('ADDRESS',self.AddressID,self.Address, self.Address2, self.City, self.State, self.ZipCode, self.Country, sep='|')
 
 
 class Controller:
@@ -123,11 +123,12 @@ class Controller:
             self.cur.execute(sql)
             return self.cur.fetchone()
         except sqlite3.Error as Err:
-            print('***ERROR OCCURED***\n|', Err, '|')
+            print('***ERROR OCCURED ***\n|', Err, '|')
         pass
 
     def _get_address_by_id(self, a_id):
         'Fetch address info from db adn return it as list'
+
         sql = f"SELECT * FROM {self.address_tbl_name} WHERE {self.address_tbl_pattern[0]}={a_id}"
         try:
             self.cur.execute(sql)
@@ -139,8 +140,11 @@ class Controller:
     def get_by_id(self, g_id):
         'Fetch all guest info (main info + address) and return GuestObject '
         gList = self._get_guest_by_id(g_id)
-        aList = self._get_address_by_id(gList[9])
-        return Guest(gList=gList, aList=aList)
+        if gList[9]!='':
+            aList = self._get_address_by_id(gList[9])
+            return  Guest(gList=gList,aList=aList)
+        else:
+            return Guest(gList=gList)
     def add_address(self,guest):
         'Adds address entry to db and return, modifies ids in guest  - '
         sql = f"INSERT INTO {self.address_tbl_name} " \
@@ -194,3 +198,29 @@ class Controller:
         else:
            return False
 
+    def get_guest_by_names(self,keyword,fetch_limit=15):
+        table = [self.guest_tbl_pattern[4],self.guest_tbl_pattern[3],self.guest_tbl_pattern[5],self.guest_tbl_pattern[6],self.address_tbl_pattern[3]]
+        keyword = dict(zip(table,keyword))
+        sql = f"SELECT {self.guest_tbl_pattern[0]} " \
+              f"FROM {self.guest_tbl_name} WHERE" \
+            #FIXME: źle pobiera z forma bo bierze kreski
+              # f" AND {self.guest_tbl_pattern[5]} LIKE '{guest.PhoneNumber}%'"\
+        for key in keyword.keys():
+            if keyword[key]!='':
+                sql+=f" {key} LIKE '{keyword[key]}%'"
+                sql+=' AND '
+            else:
+                pass
+        sql = sql[:-5]
+        try:
+            self.cur.execute(sql)
+            results = self.cur.fetchmany(fetch_limit)
+            guests_list = []
+            for el in results:
+                guests_list.append(self.get_by_id(el[0]))
+            return guests_list
+        except sqlite3.Error as Err:
+            print('***ERROR OCCURED***\n|', Err, '|')
+            return False
+
+Controller().get_guest_by_names(['B', '', '', '', ''])
