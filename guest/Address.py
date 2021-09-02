@@ -14,7 +14,7 @@ class Address:
     '''
 
     def __init__(self, **kwargs):
-        self.tbl_pattern = [
+        self.address_tbl_pattern = [
             'aAddressID',
             'aAddress',
             'aAddress2',
@@ -23,13 +23,14 @@ class Address:
             'aZipCode',
             'aCountry'
         ]
+        self.address_tbl_name = 'tblAddresses'
         if "aAddressList" in kwargs.keys():
             '''
             Inits attributes by list, musty be initiated by aAddressList in kwargs.
             Used to init instance from db fetched data.
             '''
             self.aAddressList = kwargs['aAddressList']
-            if len(self.aAddressList) != len(self.tbl_pattern):
+            if len(self.aAddressList) != len(self.address_tbl_pattern):
                 raise Exception("DATABASE INTEGRITY ERROR")
             else:
                 self.aAddressID = self.aAddressList[0]
@@ -52,62 +53,11 @@ class Address:
         if not args:
             print(self.aAddressID, self.aAddress, self.aAddress2, self.aCity, self.aState, self.aZipCode, self.aCountry,
                   sep='|')
-        else:
-            print('kaks')
 
 
-class AddressCtrl:
-    __database_name = r'test_db.db'
-
-    def __init__(self):
-        self.conn = sqlite3.connect(self.__database_name)
-        self.cur = self.conn.cursor()
-        self.tbl_name = 'tblAddresses'
-
-    def create_table(self):
-        sql = (
-            "CREATE TABLE IF NOT EXISTS 'tblAddresses' ("
-            "'aAddressID'	INTEGER NOT NULL UNIQUE,"
-            "'aAddress'	TEXT,"
-            "'aAddress2'	TEXT,"
-            "'aCity'	TEXT,"
-            "'aState'	TEXT,"
-            "'aZipCode'	TEXT,"
-            "'aCountry'	TEXT,"
-            "PRIMARY KEY('aAddressID' AUTOINCREMENT))"
-        )
-        try:
-            self.cur.execute(sql)
-            return True
-        except sqlite3.Error as Err:
-            print(Err)
-
-    def check_id(self, a_id):
-        try:
-            sql = f"SELECT * FROM {self.tbl_name} where {Address().tbl_pattern[0]}='{a_id}'"
-            self.cur.execute(sql)
-            if self.cur.fetchone() == None:
-                return False
-            else:
-                return True
-        except sqlite3.Error as Err:
-            print(Err)
-            return False
-
-    def get_by_id(self, a_id):
-        if self.check_id(a_id):
-            try:
-                sql = f"SELECT * FROM {self.tbl_name} where {Address().tbl_pattern[0]}='{a_id}'"
-                self.cur.execute(sql)
-
-                address = self.cur.fetchone()
-                return Address(aAddressList=address)
-
-            except sqlite3.Error as Err:
-                print(Err)
-                return False
-        else:
-            return False
 
 
-AddressCtrl().create_table()
+
+
+
+

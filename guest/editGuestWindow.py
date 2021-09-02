@@ -20,9 +20,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 
 )
-from Guest import GuestCtrl, Guest
+# from Guest import Guest,Cont
 from PyQt5.QtCore import Qt, QRegExp
-
+from Guest import Guest,Controller
 
 # TODO: validacja wprowadzonych danych użyciem QlineEdit
 class searchLineEdit(QLineEdit):
@@ -38,18 +38,20 @@ class searchLineEdit(QLineEdit):
         self.textChanged.connect(self.on_text_change)
 
     def on_text_change(self):
-        print(self.width())
+        pass
 
 
 class actionButton(QPushButton):
     def __init__(self):
         super().__init__()
-        self.setMaximumWidth(100)
+        self.setMaximumWidth(200)
 
 
 class editGuest(QWidget):
     def __init__(self, gGuest=None):
         super().__init__()
+        # ----
+        self.con = Controller()
         # ----
         self.legGuestID = QLineEdit()
         self.legGuestID.setFixedWidth(50)
@@ -63,7 +65,7 @@ class editGuest(QWidget):
         self.leGLastName.setMandatory()
         # ---
         self.leGPhoneNumber = searchLineEdit()
-        self.leGPhoneNumber.setInputMask('+ 99 999-999-999')
+        # self.leGPhoneNumber.setInputMask('+ 99 999-999-999')
         self.leGPhoneNumber.setCursorPosition(0)
         # ---
         self.leGMailAddress = searchLineEdit()
@@ -96,25 +98,27 @@ class editGuest(QWidget):
                 self.mandatory_fields_list.append(el)
         for el in self.mandatory_fields_list:
             if el.text() != '':
-                print(el.text())
+                pass
 
     def getGuestFromForm(self):
         updated_guest = Guest()
-        updated_guest.gGuestID = int(self.legGuestID.text()) if self.legGuestID.text() != '' else None
-        updated_guest.gFirstName = self.leGFirstName.text()
-        updated_guest.gLastName = self.leGLastName.text()
-        updated_guest.gAddress = self.leGAddress.text()
-        updated_guest.gAddress2 = self.leGAddress2.text()
-        updated_guest.gCity = self.leGCity.text()
-        updated_guest.gState = self.leGState.text()
-        updated_guest.gZipCode = self.leGZipCode.text()
-        updated_guest.gCountry = self.leGCountry.text()
-        updated_guest.gPhoneNumber = self.leGPhoneNumber.text()
-        updated_guest.gMailAddress = self.leGMailAddress.text()
-        # FIXME: gender na integer
-        updated_guest.gGender = '0'
-        updated_guest.gGuestType = self.guest_type_combo.currentIndex()
-        updated_guest.gIdNumber = self.leGIDNumber.text()
+        # ---
+        updated_guest.GuestType = self.guest_type_combo.currentIndex()
+        updated_guest.Gender = self.cmbGGender.currentIndex()
+        updated_guest.GuestID = int(self.legGuestID.text()) if self.legGuestID.text() != '' else None
+        updated_guest.FirstName = self.leGFirstName.text()
+        updated_guest.LastName = self.leGLastName.text()
+        updated_guest.PhoneNumber = self.leGPhoneNumber.text()
+        updated_guest.MailAddress = self.leGMailAddress.text()
+        # --- Addres get
+        updated_guest.Address = self.leGAddress.text()
+        updated_guest.Address2 = self.leGAddress2.text()
+        updated_guest.City = self.leGCity.text()
+        updated_guest.State = self.leGState.text()
+        updated_guest.ZipCode = self.leGZipCode.text()
+        updated_guest.Country = self.leGCountry.text()
+        updated_guest.gGender = self.guest_type_combo.currentIndex()
+        updated_guest.IdNumber = self.leGIDNumber.text()
         return updated_guest
 
     def on_text_change(self):
@@ -127,14 +131,15 @@ class editGuest(QWidget):
         retval = msg.exec_()
 
     def update_btn_on_click(self):
-        if GuestCtrl().updateGuestObj(self.getGuestFromForm()):
-            self.updatedMessageBox()
-            print("Updated")
+        #TODO: implement for new db
+        pass
+        # if GuestCtrl().updateGuestObj(self.getGuestFromForm()):
+        #     self.updatedMessageBox()
+        #     print("Updated")
 
     def new_btn_on_click(self):
         new_guest = self.getGuestFromForm()
-        new_guest.gGuestID = None
-        new_guest.gGuestID = GuestCtrl().addGuest(new_guest)
+        con.add(new_guest)
         self.initGuest(new_guest)
 
     def close_btn_on_click(self):
@@ -171,27 +176,27 @@ class editGuest(QWidget):
             pass
         else:
             # ----
-            self.legGuestID.setText(str(gGuest.gGuestID))
+            self.legGuestID.setText(str(gGuest.GuestID))
             # Guest type - 0 - Guest ; 1 - company;2 agent
-            self.guest_type_combo.setCurrentIndex(gGuest.gGuestType)
+            self.guest_type_combo.setCurrentIndex(gGuest.GuestType)
             # Todo:jak company or agent ukryć combo z gender
             # TODO: gender combo logic
             # Gender 0 male 1 female
-            self.cmbGGender.setCurrentIndex(int(gGuest.gGender))
+            self.cmbGGender.setCurrentIndex(int(gGuest.Gender))
             # ----
-            self.leGFirstName.setText(gGuest.gFirstName)
-            self.leGLastName.setText(gGuest.gLastName)
-            self.leGPhoneNumber.setText(gGuest.gPhoneNumber)
-            self.leGMailAddress.setText(gGuest.gMailAddress)
+            self.leGFirstName.setText(gGuest.FirstName)
+            self.leGLastName.setText(gGuest.LastName)
+            self.leGPhoneNumber.setText(gGuest.PhoneNumber)
+            self.leGMailAddress.setText(gGuest.MailAddress)
             # ----
-            self.leGAddress.setText(gGuest.gAddress)
-            self.leGAddress2.setText(gGuest.gAddress2)
-            self.leGZipCode.setText(gGuest.gZipCode)
-            self.leGCity.setText(gGuest.gCity)
-            self.leGState.setText(gGuest.gState)
-            self.leGCountry.setText(gGuest.gCountry)
+            self.leGAddress.setText(gGuest.Address)
+            self.leGAddress2.setText(gGuest.Address2)
+            self.leGZipCode.setText(gGuest.ZipCode)
+            self.leGCity.setText(gGuest.City)
+            self.leGState.setText(gGuest.State)
+            self.leGCountry.setText(gGuest.Country)
             # ----
-            self.leGIDNumber.setText(gGuest.gIdNumber)
+            self.leGIDNumber.setText(gGuest.IdNumber)
 
     def guest_cmb_on_change(self):
         if self.guest_type_combo.currentIndex() == 0:
@@ -259,8 +264,8 @@ class editGuest(QWidget):
 if __name__ == "__main__":
     import sys
 
-    # a = GuestCtrl().getGuestByID(101)
-
+    con = Controller()
+    a = con.get_by_id(5)
     app = QApplication(sys.argv)
     MainWindow = editGuest()
     MainWindow.show()
