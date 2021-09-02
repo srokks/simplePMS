@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMessageBox,
 )
-from Guest import GuestCtrl, Guest
+from Guest import Guest,Controller
 from editGuestWindow import editGuest
 from searchGuestWindow import searchGuest
 

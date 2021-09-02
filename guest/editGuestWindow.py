@@ -139,7 +139,7 @@ class editGuest(QWidget):
 
     def new_btn_on_click(self):
         new_guest = self.getGuestFromForm()
-        con.add(new_guest)
+        self.con.add(new_guest)
         self.initGuest(new_guest)
 
     def close_btn_on_click(self):

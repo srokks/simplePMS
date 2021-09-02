@@ -201,26 +201,32 @@ class Controller:
     def get_guest_by_names(self,keyword,fetch_limit=15):
         table = [self.guest_tbl_pattern[4],self.guest_tbl_pattern[3],self.guest_tbl_pattern[5],self.guest_tbl_pattern[6],self.address_tbl_pattern[3]]
         keyword = dict(zip(table,keyword))
+
         sql = f"SELECT {self.guest_tbl_pattern[0]} " \
-              f"FROM {self.guest_tbl_name} WHERE" \
-            #FIXME: źle pobiera z forma bo bierze kreski
-              # f" AND {self.guest_tbl_pattern[5]} LIKE '{guest.PhoneNumber}%'"\
+              f"FROM {self.guest_tbl_name} INNER JOIN {self.address_tbl_name} " \
+              f"ON {self.guest_tbl_pattern[0]}={self.address_tbl_pattern[0]}" \
+              f" WHERE "
         for key in keyword.keys():
             if keyword[key]!='':
-                sql+=f" {key} LIKE '{keyword[key]}%'"
+                sql+=f"{key} LIKE '{keyword[key]}%'"
                 sql+=' AND '
             else:
                 pass
-        sql = sql[:-5]
+        if sql[-7:]==' WHERE ':sql=sql[:-7]
+        if sql[-5:]==' AND ':sql=sql[:-5]
+        # print("TEST", keyword, sql, sep=' | ')
         try:
             self.cur.execute(sql)
             results = self.cur.fetchmany(fetch_limit)
             guests_list = []
             for el in results:
                 guests_list.append(self.get_by_id(el[0]))
+            # for el in guests_list:
+            #     el()
+            print(sql)
             return guests_list
         except sqlite3.Error as Err:
+            print("--Fetch by name--")
             print('***ERROR OCCURED***\n|', Err, '|')
+            # print(sql)
             return False
-
-Controller().get_guest_by_names(['B', '', '', '', ''])

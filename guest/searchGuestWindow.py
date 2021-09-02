@@ -77,7 +77,7 @@ class searchGuest(QWidget):
         self.le_mail_address = searchLineEdit()
         self.le_mail_address.setPlaceholderText('Mail address')
         self.le_mail_address.setObjectName('gMailAddress')
-        self.le_mail_address.setInputMask(">AAAAA")
+        # self.le_mail_address.setInputMask(">AAAAA")
         self.le_mail_address.setCursorPosition(0)
         self.le_mail_address.returnPressed.connect(self.search_btn_onclick)
         # ---
@@ -184,13 +184,14 @@ class searchGuest(QWidget):
         keyword = self.get_search_keyword()
         self.guest_list = Controller().get_guest_by_names(keyword)
         self.clear_guest_grid()
-        for pos, el in enumerate(self.guest_list):
-            guest_tbl.item(pos, 0).setText(str(el.GuestID))
-            guest_tbl.item(pos, 1).setText(el.FirstName)
-            guest_tbl.item(pos, 2).setText(el.LastName)
-            guest_tbl.item(pos, 3).setText(el.City)
-            guest_tbl.item(pos, 4).setText(el.PhoneNumber)
-            guest_tbl.item(pos, 5).setText(el.MailAddress)
+        if  self.guest_list:
+            for pos, el in enumerate(self.guest_list):
+                guest_tbl.item(pos, 0).setText(str(el.GuestID))
+                guest_tbl.item(pos, 1).setText(el.FirstName)
+                guest_tbl.item(pos, 2).setText(el.LastName)
+                guest_tbl.item(pos, 3).setText(el.City)
+                guest_tbl.item(pos, 4).setText(el.PhoneNumber)
+                guest_tbl.item(pos, 5).setText(el.MailAddress)
 
 if __name__ == "__main__":
     import sys
