@@ -88,9 +88,9 @@ class editGuest(QWidget):
         # ----
         self.general_layout = QHBoxLayout()
         self.setLayout(self.general_layout)
-        self.createForm()
+        self.create_form()
         self.initGuest(gGuest)
-        self.addActionBtn()
+        self.add_action_button()
         # ---- WIP ---
         self.mandatory_fields_list = []
         for el in self.findChildren(searchLineEdit):
@@ -100,7 +100,7 @@ class editGuest(QWidget):
             if el.text() != '':
                 pass
 
-    def getGuestFromForm(self):
+    def get_guest_from_form(self):
         updated_guest = Guest()
         # ---
         updated_guest.GuestType = self.guest_type_combo.currentIndex()
@@ -129,32 +129,36 @@ class editGuest(QWidget):
         msg.setText("Information updated")
         msg.setStandardButtons(QMessageBox.Ok)
         retval = msg.exec_()
-
-    def update_btn_on_click(self):
+    def created_msg_box(self,guest):
+        msg = QMessageBox()
+        msg.setText(f"Created entry for {guest.FirstName},{guest.LastName}")
+        msg.setStandardButtons(QMessageBox.Ok)
+        retval = msg.exec_()
+    def on_click_update_btn(self):
         #TODO: implement for new db
-        pass
-        # if GuestCtrl().updateGuestObj(self.getGuestFromForm()):
-        #     self.updatedMessageBox()
-        #     print("Updated")
-
-    def new_btn_on_click(self):
-        new_guest = self.getGuestFromForm()
+        new_guest = self.get_guest_from_form()
+        if self.con.update_guest(new_guest):
+            self.updatedMessageBox()
+        else:
+            print('problem')
+    def on_click_new_btn(self):
+        new_guest = self.get_guest_from_form()
         self.con.add(new_guest)
         self.initGuest(new_guest)
-
+        self.created_msg_box(new_guest)
     def close_btn_on_click(self):
         self.close()
 
-    def addActionBtn(self):
+    def add_action_button(self):
         VLayout = QVBoxLayout()
         # ----
         new_bnt = actionButton()
         new_bnt.setText('New')
-        new_bnt.clicked.connect(self.new_btn_on_click)
+        new_bnt.clicked.connect(self.on_click_new_btn)
         # ----
         change_btn = actionButton()
         change_btn.setText('Modify')
-        change_btn.clicked.connect(self.update_btn_on_click)
+        change_btn.clicked.connect(self.on_click_update_btn)
         # ----
         # TODO: delete guest event
         delete_btn = actionButton()
@@ -206,7 +210,7 @@ class editGuest(QWidget):
             self.legIdNumberLabel.setText('Cmp. number')
             self.cmbGGender.setVisible(0)
 
-    def createForm(self):
+    def create_form(self):
         form_layout = QFormLayout()
         tab_widget = QTabWidget()
         tab_widget.setMaximumWidth(350)
@@ -265,7 +269,8 @@ if __name__ == "__main__":
     import sys
 
     con = Controller()
+    a = con.get_by_id(227)
     app = QApplication(sys.argv)
-    MainWindow = editGuest()
+    MainWindow = editGuest(a)
     MainWindow.show()
     sys.exit(app.exec_())

@@ -238,3 +238,40 @@ class Controller:
             # print(sql)
             return False
 
+    def update_guest(self,guest):
+        old_guest = self.get_by_id(guest.GuestID)
+        try:
+            sql = f"UPDATE {self.guest_tbl_name} " \
+                  f"SET "
+                  # f"{self.guest_tbl_pattern[1]}={guest.GuestType},"\
+                  # f"{self.guest_tbl_pattern[2]}={guest.Gender},"\
+                  # f"{self.guest_tbl_pattern[3]}={guest.FirstName},"\
+                  # f"{self.guest_tbl_pattern[4]}={guest.LastName},"\
+                  # f"{self.guest_tbl_pattern[5]}={guest.PhoneNumber},"\
+                  # f"{self.guest_tbl_pattern[6]}={guest.MailAddress},"
+
+            if old_guest.GuestType!=guest.GuestType:
+                sql+=f"{self.guest_tbl_pattern[1]}='{guest.GuestType}',"
+            if old_guest.Gender != guest.Gender:
+                sql += f"{self.guest_tbl_pattern[2]}='{guest.Gender}',"
+            if old_guest.FirstName != guest.FirstName:
+                sql += f"{self.guest_tbl_pattern[3]}='{guest.FirstName}',"
+            if old_guest.LastName != guest.LastName:
+                sql += f"{self.guest_tbl_pattern[4]}='{guest.LastName}',"
+            if old_guest.PhoneNumber != guest.PhoneNumber:
+                sql += f"{self.guest_tbl_pattern[5]}='{guest.PhoneNumber}',"
+            if old_guest.MailAddress != guest.MailAddress:
+                sql += f"{self.guest_tbl_pattern[6]}='{guest.MailAddress}',"
+            if old_guest.IdNumber != guest.IdNumber:
+                sql += f"{self.guest_tbl_pattern[7]}='{guest.IdNumber}',"
+            if sql[-1:]==",":sql=sql[:-1]
+            sql += f" WHERE {self.guest_tbl_pattern[0]}='{guest.GuestID}'"
+            self.cur.execute(sql)
+            self.conn.commit()
+            #TODO:zmiana adresu
+            return True
+        except sqlite3.Error as Err:
+            print("--Update by id--")
+            print('***ERROR OCCURED***\n|', Err, '|')
+            print(sql)
+            return False
