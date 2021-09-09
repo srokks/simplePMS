@@ -136,13 +136,9 @@ class searchGuest(QWidget):
 
     def grid_on_dclick(self):
         table = self.findChild(QTableWidget)
-        # guest  = Controller().get_by_id(table.item(table.currentRow(),0).text())
-        if table.item(table.currentRow(),0).text()=='':
-            self.editWindow = editGuest()
-            self.editWindow.show()
-        else:
-            self.editWindow = editGuest(Controller().get_by_id(table.item(table.currentRow(),0).text()))
-            self.editWindow.show()
+        guest  = Controller().get_by_id(table.item(table.currentRow(),0).text())
+        self.editWindow = editGuest(guest)
+        self.editWindow.show()
     def guest_table(self):
         main_layout = QVBoxLayout()
         cols = 6

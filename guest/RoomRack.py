@@ -1,10 +1,11 @@
 import datetime
 import sys
-from PyQt5.QtGui import QPainter,QColor,QBrush,QPen,QFont
+from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QFont, QPainterPath,QPixmap
 from PyQt5.QtSql import QSqlDatabase,QSqlTableModel
 from PyQt5.QtCore import QAbstractTableModel,QEvent,Qt,QRect
 from PyQt5.QtWidgets import (
     QDialog,
+QSizeGrip,
 QScrollArea,
     QWidget,
     QMainWindow,
@@ -32,10 +33,17 @@ tile_height = 25
 tile_width = 100
 days = 31
 rooms = len(ROOMS)
+
+
 class res_tile(QWidget):
     def __init__(self):
         super(res_tile, self).__init__()
-        main_lay = QVBoxLayout()
+        main_lay = QHBoxLayout()
+        main_lay.setContentsMargins(0,0,0,0)
+        main_lay.setSpacing(0)
+        self.setLayout(main_lay)
+
+
 
         sample_res = {'id': '123', 'name': 'Jarek Sroka', 'color': 'yellow'}
         self.res_id = sample_res['id']
@@ -44,26 +52,74 @@ class res_tile(QWidget):
             self.color = 'green'
         else:
             self.color = sample_res['color']
+    def mouseMoveEvent(self, event):
+        print(event.pos())
     def paintEvent(self, e):
         painter = QPainter(self)
-        brush = QBrush()
-        brush.setColor(QColor('green'))
-        brush.setStyle(Qt.SolidPattern)
-        rect = QRect(1,1,self.width()-1,self.height()-1,)
-        # painter.fillRect(rect,brush)
-        painter.drawRoundedRect(rect,2,2)
-        font = QFont()
-        font.setFamily("Arial")
-        font.setPointSize(self.height()-10)
-        font.setBold(True)
-        painter.setFont(font)
-        pen = QPen()
-        pen.setColor(QColor('black'))
-        pen.setWidth(1)
+        painter.setRenderHint(painter.Antialiasing)
+        path = QPainterPath()
+        rect = QRect (1,1,self.width(),self.height())
+
+        path.addRoundedRect(1,1,self.width()-1,self.height()-1,5,5)
+
+        pen = QPen(QColor('green'),1)
         painter.setPen(pen)
-        painter.drawText(5,self.height()-7,self.res_id+':'+self.name)
+        painter.fillPath(path,QColor('red'))
+        painter.drawPath(path)
+        painter.end()
+    def mousePressEvent(self, event):
+        print(self.size())
+class day_tile(QWidget):
+    def __init__(self):
+        super(day_tile, self).__init__()
+        pixmap = QPixmap(self.width(),self.height())
+        main_lay = QHBoxLayout()
+        main_lay.setContentsMargins(0,0,0,0)
+        main_lay.setSpacing(0)
+        self.selected = None
+        self.setLayout(main_lay)
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHint(painter.Antialiasing)
+        path = QPainterPath()
+        rect = QRect (0,0,self.width(),self.height())
+        painter.drawRect(rect)
+        print(e.type())
+        if self.selected=='L' or self.selected=='R':
+            if self.selected=='L':
+                rect = QRect(0,0,int(self.width()/2),self.height())
+            elif self.selected=='R':
+                rect = QRect(int(self.width()/2), 0, self.width(), self.height())
+            brush = QBrush()
+            brush.setColor(QColor(195,195,195))
+            brush.setStyle(Qt.SolidPattern)
+            painter.fillRect(rect,brush)
+
         painter.end()
 
+    def draw_something(self):
+        painter = QPainter(self.pixmap())
+        pen = QPen()
+        pen.setWidth(40)
+        pen.setColor(QColor('red'))
+        painter.setPen(pen)
+        painter.drawPoint(200, 150)
+        painter.end()
+
+    def mousePressEvent(self, event):
+        clicked_pos = event.pos().x()
+        if clicked_pos<tile_width/2:
+            print('L')
+            self.selected='L'
+            self.update()
+        elif clicked_pos>tile_width/2:
+            print('R')
+            self.selected='R'
+            self.update()
+    def mouseReleaseEvent(self, event):
+        self.selected=None
+        self.update()
 class day_label(QLabel):
     def __init__(self,date=''):
         super(day_label, self).__init__()
@@ -83,26 +139,34 @@ class room_label(QLabel):
 class room_rack(QWidget):
     def __init__(self):
         super().__init__()# self.setMaximumSize(400,300)
-        grid_layout = QGridLayout()
-        grid_layout.setSpacing(1)
-
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setSpacing(1)
+        gripper = QSizeGrip(self)
         today = datetime.date.today()
         # ----
-        for i in range(1,days):
+
+        for i in range(1,days*2,2):
             lab = day_label()
             lab.setText((today-datetime.timedelta(days=i-2)).strftime('%d.%m'))
-            grid_layout.addWidget(lab,0,i)
+            self.grid_layout.addWidget(lab,0,i,1,2)
         for i in range(1,rooms):
             lab = room_label()
             lab.setText(ROOMS[i-1])
-            grid_layout.addWidget(lab, i, 0)
+            self.grid_layout.addWidget(lab, i, 0)
+        for i in range(1,self.grid_layout.columnCount(),2):
+            for j in range(1,self.grid_layout.rowCount()):
+                self.grid_layout.addWidget(day_tile(), j, i, 1, 2)
+        # self.grid_layout.addWidget(day_tile(),1,1,1,2)
         but = QPushButton()
         but.setText("FILTER")
-        grid_layout.addWidget(but,0,0)
-        grid_layout.addWidget(res_tile(), 2, 1, 1, 2)
-        grid_layout.addWidget(res_tile(), 3, 5, 1, 2)
+        self.i = 1
+        self.grid_layout.addWidget(but,0,0)
+        # self.grid_layout.addWidget(day_tile(), 1, 1, 1, 2)
+        # self.grid_layout.addWidget(res_tile(),self.i, 2, 1, 2)
+        # self.grid_layout.addWidget(res_tile(), 3, 4, 1, 2)
+        # self.grid_layout.addWidget(res_tile(), 1, 2, 1, 2)
         wi = QWidget()
-        wi.setLayout(grid_layout)
+        wi.setLayout(self.grid_layout)
         scroll = QScrollArea()
         scroll.setWidget(wi)
         main_layout = QHBoxLayout()
@@ -110,11 +174,12 @@ class room_rack(QWidget):
         main_layout.addWidget(scroll)
         self.setLayout(main_layout)
     def test(self,e):
-        print(e.pos())
-
+        self.i += 1
+        self.grid_layout.addWidget(day_tile(), self.i, 2, 1, 2)
 
 app = QApplication(sys.argv)
 win = room_rack()
+win.move(0,0)
 win.resize(800,600)
 win.show()
 app.exec_()
