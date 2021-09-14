@@ -205,7 +205,11 @@ class day_label(QLabel):
         self.setAlignment(Qt.AlignCenter)
         self.setFrameShape(QFrame.Panel)
         self.setFrameShadow(QFrame.Sunken)
-
+        self.date = datetime.date(2000,1,1)
+    def setDate(self,date):
+        self.date=date
+        self.setText(self.date.strftime('%d.%m'))
+        self.setToolTip(self.date.strftime('%d.%m.%Y'))
 
 class room_label(QLabel):
     def __init__(self, date=''):
@@ -225,25 +229,30 @@ class room_rack(QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         # ----
         day_scroll = QScrollArea()
+
         day_scroll.setContentsMargins(0, 0, 0, 0)
         day_scroll.setFrameShape(day_scroll.NoFrame)
         day_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         day_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         day_scroll.setFixedHeight(tile_height)
         day_wi = QWidget()
-        day_lay = QHBoxLayout()
-        day_lay.setSpacing(0)
-        day_lay.setContentsMargins(0, 0, 0, 0)
+        self.day_lay = QHBoxLayout()
+        self.day_lay.setSpacing(0)
+        self.day_lay.setContentsMargins(0, 0, 0, 0)
         for i in range(days_limit):
-            day_lay.addWidget(day_label())
+            lab = day_label()
+            lab.setDate(today+datetime.timedelta(days=i))
+            self.day_lay.addWidget(lab)
 
-        day_wi.setLayout(day_lay)
+
+        day_wi.setLayout(self.day_lay)
         day_scroll.setWidget(day_wi)
         # ---
         top_layout = QHBoxLayout()
         top_layout.setSpacing(0)
         top_layout.setContentsMargins(0, 0, 0, 0)
         self.filtr_btn = day_label()
+
         self.filtr_btn.setText("FILTER")
 
         # --
@@ -258,14 +267,14 @@ class room_rack(QWidget):
         room_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         room_scroll.setMaximumWidth(tile_width)
         room_wi = QWidget()
-        room_lay = QVBoxLayout()
-        room_lay.setSpacing(0)
-        room_lay.setContentsMargins(0, 0, 0, 0)
+        self.room_lay = QVBoxLayout()
+        self.room_lay.setSpacing(0)
+        self.room_lay.setContentsMargins(0, 0, 0, 0)
         for el in ROOMS:
             lab = room_label()
             lab.setText(el)
-            room_lay.addWidget(lab)
-        room_wi.setLayout(room_lay)
+            self.room_lay.addWidget(lab)
+        room_wi.setLayout(self.room_lay)
         room_scroll.setWidget(room_wi)
         # ------
         grid_scroll = QScrollArea()
@@ -288,7 +297,7 @@ class room_rack(QWidget):
         control_layout = QHBoxLayout()
         self.prev_day_btn = QPushButton()
         self.prev_day_btn.setText('<-')
-
+        self.prev_day_btn.clicked.connect(self.prev_day_btn_on_click)
         control_layout.addWidget(self.prev_day_btn)
         control_layout.addWidget(QPushButton("today"))
         control_layout.addWidget(QPushButton("->"))
@@ -303,6 +312,16 @@ class room_rack(QWidget):
         self.main_layout.addLayout(control_layout)
         self.setLayout(self.main_layout)
         self.grid_lay.addWidget(res_tile(), 0, 1, 1, 4)
+    def prev_day_btn_on_click(self):
+
+        '''adds day label in up grid
+        lab = day_label()
+        lab.setDate((self.day_lay.itemAt(0).widget().date)-datetime.timedelta(days=1))
+        self.day_lay.insertWidget(0,lab)'''
+
+
+        pass
+    
 
 
 app = QApplication(sys.argv)
