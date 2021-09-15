@@ -1,12 +1,19 @@
 import sqlite3
 
+from PyQt5.QtSql import QSqlDatabase
+
 
 class Connection:
     __database_name = r'test_db.db'
 
     def __init__(self):
-        self.conn = sqlite3.connect(self.__database_name)
+        db = QSqlDatabase('QSQLITE')
+        db_name = r'test_db.db'
+        db.setDatabaseName(db_name)
+        db.open()
+        # print(db.isOpen())
+        # print(db.tables())
+        return db
 
 
-    def get_connection(self):
-        return self.conn
+
