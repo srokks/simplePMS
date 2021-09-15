@@ -33,7 +33,7 @@ tile_height = 25
 tile_width = 75
 days_limit = 31
 rooms = len(ROOMS)
-
+from dayTile import DayTile
 
 class res_tile(QWidget):
     def __init__(self):
@@ -87,117 +87,6 @@ class res_tile(QWidget):
             painter.fillPath(path, QColor('red'))
             painter.drawPath(path)
         painter.end()
-
-
-class day_tile(QWidget):
-    clicked = pyqtSignal()
-
-    def __init__(self):
-        super(day_tile, self).__init__()
-        self.setFixedSize(tile_width, tile_height)
-        pixmap = QPixmap(self.width(), self.height())
-        main_lay = QHBoxLayout()
-        main_lay.setContentsMargins(0, 0, 0, 0)
-        main_lay.setSpacing(0)
-        self.room_id = None
-        self.date = datetime.date(2000,1,1)
-        self.installEventFilter(self)
-        self.selected = None
-        self.hover = False
-        self.over = False
-        self.setLayout(main_lay)
-        self.pressed_point = None
-    def setName(self,date,room_id):
-        self.date = date
-        self.room_id = room_id
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHint(painter.Antialiasing)
-        path = QPainterPath()
-        rect = QRect(0, 0, self.width(), self.height())
-        pen = QPen(QColor('red'), 1)
-        painter.setPen(pen)
-        painter.drawRect(rect)
-        if self.selected == 'L' or self.selected == 'R':
-            if self.selected == 'L':
-                rect = QRect(0, 0, int(self.width() / 2), self.height())
-            elif self.selected == 'R':
-                rect = QRect(int(self.width() / 2), 0, self.width(), self.height())
-            brush = QBrush()
-            brush.setColor(QColor(195, 195, 195))
-            brush.setStyle(Qt.SolidPattern)
-            painter.fillRect(rect, brush)
-        elif self.hover == True:
-            brush = QBrush()
-            rect = QRect(0, 0, self.width(), self.height())
-            brush.setColor(QColor(195, 195, 12))
-            brush.setStyle(Qt.SolidPattern)
-            painter.fillRect(rect, brush)
-
-    # def mouseMoveEvent(self,event):
-    #     '''when tile pressed restrict mouse movement to y dimension'''
-    #
-    #     self.cursor().setPos(self.cursor().pos().x(),self.pressed_point)
-
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.Leave:
-            self.offHovered()
-        elif event.type() == QEvent.Enter:
-            self.onHovered()
-        elif event.type() == QEvent.MouseButtonPress:
-            self.on_pressed(event)
-        elif event.type() == QEvent.MouseButtonRelease:
-            self.on_release()
-        return super(day_tile, self).eventFilter(obj, event)
-
-    def on_release(self):
-        self.selected = None
-        self.update()
-
-    def on_pressed(self, event):
-        if event.pos().x() < tile_width / 2:
-            self.selected = 'L'
-            self.update()
-        if event.pos().x() > tile_width / 2:
-            self.selected = 'R'
-            self.update()
-            #Fixme: get rid of it
-        print(self.date, self.room_id, sep="|")
-
-    def onHovered(self):
-        # self.hover = True
-        # print('hovered')
-        # self.update()
-
-        pass
-
-    def offHovered(self):
-        # self.hover = False
-        # print('hovered')
-
-        pass
-        # self.update()
-
-    # def mousePressEvent(self, event):
-    #     if event.buttons() & Qt.LeftButton:
-    #         self.dragstart = event.pos()
-    #         self.clicked.emit()
-    #     clicked_pos = event.pos().x()
-    #     self.pressed_point = self.cursor().pos().y()
-    #
-    #     if clicked_pos<tile_width/2:
-    #         #triggered when clicked left side of widget
-    #         print('l')
-    #         self.selected='L'
-    #         self.update()
-    #     elif clicked_pos>tile_width/2:
-    #         #triggered when clicked right side of widget
-    #         self.selected='R'
-    #         self.update()
-    # def mouseReleaseEvent(self, event):
-    #     self.selected=None
-    #     self.dragstart = None
-    #     self.update()
 
 
 class day_label(QLabel):
@@ -284,22 +173,25 @@ class room_rack(QWidget):
         grid_scroll = QScrollArea()
         grid_scroll.setFrameShape(grid_scroll.NoFrame)
         grid_wi = QWidget()
-        self.grid_lay = QGridLayout()
+        self.grid_lay = QHBoxLayout()
         self.grid_lay.setSpacing(0)
         self.grid_lay.setContentsMargins(0, 0, 0, 0)
         grid_scroll.verticalScrollBar().valueChanged.connect(
             lambda value: room_scroll.verticalScrollBar().setValue(value))
         grid_scroll.horizontalScrollBar().valueChanged.connect(
             lambda value: day_scroll.horizontalScrollBar().setValue(value))
-        print(self.day_lay.itemAt(0).widget().date)
-        for i in range(len(ROOMS)):
-            for j in range(0, days_limit * 2, 2):
-                tile = day_tile()
-                room_name = self.room_lay.itemAt(i).widget().room_id
-                date = self.day_lay.itemAt(int(j/2)).widget().date
-                tile.setName(date,room_name)
-                self.grid_lay.addWidget(tile, i, j, 1, 2)
-
+        for i in range(len(self.day_lay)):
+            lay = QVBoxLayout()
+            lay.setSpacing(0)
+            lay.setContentsMargins(0,0,0,0)
+            date = self.day_lay.itemAt(i).widget().date
+            lay.setObjectName(date.strftime('%d.%m.%Y'))
+            for j in range(len(self.room_lay)):
+                tile = DayTile()
+                room_id = self.room_lay.itemAt(j).widget().room_id
+                tile.setObjectName(lay.objectName()+'|'+room_id)
+                lay.addWidget(tile)
+            self.grid_lay.addLayout(lay)
         grid_wi.setLayout(self.grid_lay)
         grid_scroll.setWidget(grid_wi)
         # ----
@@ -327,7 +219,7 @@ class room_rack(QWidget):
         lab = day_label()
         lab.setDate((self.day_lay.itemAt(0).widget().date)-datetime.timedelta(days=1))
         self.day_lay.insertWidget(0,lab)'''
-        self.grid_lay.findChildren(day_tile)
+        self.grid_lay.findChildren(DayTile)
 
         pass
     
