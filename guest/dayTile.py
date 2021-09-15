@@ -109,7 +109,7 @@ class DayTile(QWidget):
             self.selected = 'R'
             self.update()
             # Fixme: get rid of it
-        print(self.date, self.room_id, sep="|")
+        print(self.objectName())
 
     def onHovered(self):
         # self.hover = True
