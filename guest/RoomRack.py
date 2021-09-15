@@ -99,15 +99,17 @@ class day_tile(QWidget):
         main_lay = QHBoxLayout()
         main_lay.setContentsMargins(0, 0, 0, 0)
         main_lay.setSpacing(0)
+        self.room_id = None
+        self.date = datetime.date(2000,1,1)
         self.installEventFilter(self)
         self.selected = None
-        self.setAcceptDrops(True)
         self.hover = False
         self.over = False
         self.setLayout(main_lay)
         self.pressed_point = None
-        self.setMouseTracking(True)
-
+    def setName(self,date,room_id):
+        self.date = date
+        self.room_id = room_id
     def paintEvent(self, e):
         painter = QPainter(self)
         painter.setRenderHint(painter.Antialiasing)
@@ -116,7 +118,6 @@ class day_tile(QWidget):
         pen = QPen(QColor('red'), 1)
         painter.setPen(pen)
         painter.drawRect(rect)
-
         if self.selected == 'L' or self.selected == 'R':
             if self.selected == 'L':
                 rect = QRect(0, 0, int(self.width() / 2), self.height())
@@ -160,6 +161,8 @@ class day_tile(QWidget):
         if event.pos().x() > tile_width / 2:
             self.selected = 'R'
             self.update()
+            #Fixme: get rid of it
+        print(self.date, self.room_id, sep="|")
 
     def onHovered(self):
         # self.hover = True
@@ -210,7 +213,6 @@ class day_label(QLabel):
         self.date=date
         self.setText(self.date.strftime('%d.%m'))
         self.setToolTip(self.date.strftime('%d.%m.%Y'))
-
 class room_label(QLabel):
     def __init__(self, date=''):
         super(room_label, self).__init__()
@@ -219,8 +221,10 @@ class room_label(QLabel):
         self.setFrameShape(QFrame.Panel)
         self.setFrameShadow(QFrame.Sunken)
         self.setAlignment(Qt.AlignCenter)
-
-
+        self.room_id = None
+    def setID(self,room_id):
+        self.room_id = room_id
+        self.setText(self.room_id)
 class room_rack(QWidget):
     def __init__(self):
         super().__init__()
@@ -272,7 +276,7 @@ class room_rack(QWidget):
         self.room_lay.setContentsMargins(0, 0, 0, 0)
         for el in ROOMS:
             lab = room_label()
-            lab.setText(el)
+            lab.setID(el)
             self.room_lay.addWidget(lab)
         room_wi.setLayout(self.room_lay)
         room_scroll.setWidget(room_wi)
@@ -287,10 +291,15 @@ class room_rack(QWidget):
             lambda value: room_scroll.verticalScrollBar().setValue(value))
         grid_scroll.horizontalScrollBar().valueChanged.connect(
             lambda value: day_scroll.horizontalScrollBar().setValue(value))
+        print(self.day_lay.itemAt(0).widget().date)
         for i in range(len(ROOMS)):
             for j in range(0, days_limit * 2, 2):
                 tile = day_tile()
+                room_name = self.room_lay.itemAt(i).widget().room_id
+                date = self.day_lay.itemAt(int(j/2)).widget().date
+                tile.setName(date,room_name)
                 self.grid_lay.addWidget(tile, i, j, 1, 2)
+
         grid_wi.setLayout(self.grid_lay)
         grid_scroll.setWidget(grid_wi)
         # ----
@@ -311,14 +320,14 @@ class room_rack(QWidget):
         self.main_layout.addLayout(bottom_layout)
         self.main_layout.addLayout(control_layout)
         self.setLayout(self.main_layout)
-        self.grid_lay.addWidget(res_tile(), 0, 1, 1, 4)
+        # self.grid_lay.addWidget(res_tile(), 0, 1, 1, 4)
     def prev_day_btn_on_click(self):
 
         '''adds day label in up grid
         lab = day_label()
         lab.setDate((self.day_lay.itemAt(0).widget().date)-datetime.timedelta(days=1))
         self.day_lay.insertWidget(0,lab)'''
-
+        self.grid_lay.findChildren(day_tile)
 
         pass
     
