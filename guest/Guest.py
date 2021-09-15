@@ -1,5 +1,4 @@
 import sqlite3
-from Connection import Connection
 
 
 class Address:

@@ -24,10 +24,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        search_btn = QPushButton('searchGuestWindow.py')
+        search_btn = QPushButton('guest/searchGuestWindow.py')
         search_btn.clicked.connect(self.showSearchGuest)
 
-        new_btn = QPushButton('editGuestWindow.py')
+        new_btn = QPushButton('guest/editGuestWindow.py')
         new_btn.clicked.connect(self.showEditGuest)
         but_layout = QVBoxLayout()
         but_layout.addWidget(search_btn)
