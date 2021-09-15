@@ -16,9 +16,9 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMessageBox,
 )
-from Guest import Guest,Controller
-from editGuestWindow import editGuest
-from searchGuestWindow import searchGuest
+from guest import Guest
+from guest import editGuestWindow
+from guest import searchGuestWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -28,12 +28,12 @@ class MainWindow(QMainWindow):
         search_btn.clicked.connect(self.showSearchGuest)
 
         new_btn = QPushButton('guest/editGuestWindow.py')
-        new_btn.clicked.connect(self.showEditGuest)
+        new_btn.clicked.connec2(self.showEditGuest)
         but_layout = QVBoxLayout()
         but_layout.addWidget(search_btn)
         but_layout.addWidget(new_btn)
-        self.searchGuest = searchGuest()
-        self.editGuest = editGuest()
+        self.searchGuest = searchGuestWindow.searchGuest()
+        self.editGuest = editGuestWindow.editGuest()
         wi = QWidget()
         wi.setLayout(but_layout)
         self.setCentralWidget(wi)

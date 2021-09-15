@@ -20,9 +20,10 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 
 )
-# from Guest import Guest,Cont
+
+from Guest import Guest
 from PyQt5.QtCore import Qt, QRegExp
-from Guest import Guest,Controller
+
 
 # TODO: validacja wprowadzonych danych użyciem QlineEdit
 class searchLineEdit(QLineEdit):
