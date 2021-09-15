@@ -26,12 +26,12 @@ from PyQt5.QtWidgets import (
     QFrame
 )
 
-ROOMS = [str(x) for x in range(101,200)]
+ROOMS = [str(x) for x in range(101,150)]
 today = datetime.date.today()
 DAYS = [(today + datetime.timedelta(days=x)).strftime('%d.%m') for x in range(-3, 31)]
 tile_height = 25
 tile_width = 75
-days_limit =30
+days_limit =25
 rooms = len(ROOMS)
 from dayTile import DayTile
 
@@ -134,14 +134,14 @@ class room_rack(QWidget):
         day_scroll.setFixedHeight(tile_height)
         day_wi = QWidget()
         self.day_lay = QHBoxLayout()
-        self.day_lay.setSpacing(2)
+        self.day_lay.setSpacing(0)
         self.day_lay.setContentsMargins(0, 0, 0, 0)
         for i in range(days_limit):
             lab = day_label()
             lab.setDate(today+datetime.timedelta(days=i))
             lab.setWordWrap(True)
             self.day_lay.addWidget(lab)
-        day_wi.setFixedWidth(len(self.day_lay)*tile_width)
+
 
         day_wi.setLayout(self.day_lay)
         day_scroll.setWidget(day_wi)
@@ -221,7 +221,7 @@ class room_rack(QWidget):
         bottom_layout.addWidget(room_scroll)
         bottom_layout.addWidget(grid_scroll)
         self.main_layout.addLayout(top_layout)
-        # self.main_layout.addLayout(bottom_layout)
+        self.main_layout.addLayout(bottom_layout)
         self.main_layout.addLayout(control_layout)
         self.setLayout(self.main_layout)
         #self.grid_lay.addWidget(res_tile(), 0, 1, 1, 4)
