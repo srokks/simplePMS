@@ -20,9 +20,10 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 
 )
-# from Guest import Guest,Cont
+
+
 from PyQt5.QtCore import Qt, QRegExp
-from Guest import Guest,Controller
+
 
 # TODO: validacja wprowadzonych danych użyciem QlineEdit
 class searchLineEdit(QLineEdit):
@@ -56,7 +57,7 @@ class editGuest(QWidget):
         self.legGuestID = QLineEdit()
         self.legGuestID.setFixedWidth(50)
         self.guest_type_combo = QComboBox()
-        self.cmbGGender = QComboBox()
+        self.gender_cmb = QComboBox()
         # ----
         self.leGFirstName = searchLineEdit()
         self.leGFirstName.setMandatory()
@@ -65,7 +66,7 @@ class editGuest(QWidget):
         self.leGLastName.setMandatory()
         # ---
         self.leGPhoneNumber = searchLineEdit()
-        # self.leGPhoneNumber.setInputMask('+ 99 999-999-999')
+        #self.leGPhoneNumber.setInputMask('+ 99 999-999-999')
         self.leGPhoneNumber.setCursorPosition(0)
         # ---
         self.leGMailAddress = searchLineEdit()
@@ -104,7 +105,7 @@ class editGuest(QWidget):
         updated_guest = Guest()
         # ---
         updated_guest.GuestType = self.guest_type_combo.currentIndex()
-        updated_guest.Gender = self.cmbGGender.currentIndex()
+        updated_guest.Gender = self.gender_cmb.currentIndex()
         updated_guest.GuestID = int(self.legGuestID.text()) if self.legGuestID.text() != '' else None
         updated_guest.FirstName = self.leGFirstName.text()
         updated_guest.LastName = self.leGLastName.text()
@@ -148,7 +149,6 @@ class editGuest(QWidget):
         self.created_msg_box(new_guest)
     def close_btn_on_click(self):
         self.close()
-
     def add_action_button(self):
         VLayout = QVBoxLayout()
         # ----
@@ -156,9 +156,10 @@ class editGuest(QWidget):
         new_bnt.setText('New')
         new_bnt.clicked.connect(self.on_click_new_btn)
         # ----
-        change_btn = actionButton()
-        change_btn.setText('Modify')
-        change_btn.clicked.connect(self.on_click_update_btn)
+        self.update_btn = actionButton()
+        self.update_btn.setText('Modify')
+        self.update_btn.clicked.connect(self.on_click_update_btn)
+        self.update_btn.setEnabled(False)
         # ----
         # TODO: delete guest event
         delete_btn = actionButton()
@@ -169,13 +170,14 @@ class editGuest(QWidget):
         close_btn.clicked.connect(self.close_btn_on_click)
         # ----
         VLayout.addWidget(new_bnt)
-        VLayout.addWidget(change_btn)
+        VLayout.addWidget(self.update_btn)
         VLayout.addWidget(delete_btn)
         VLayout.addWidget(close_btn)
         VLayout.addStretch()
         self.general_layout.addLayout(VLayout)
 
     def initGuest(self, gGuest):
+        '''Enters gGuest attributes into form'''
         if gGuest == None:
             pass
         else:
@@ -186,7 +188,7 @@ class editGuest(QWidget):
             # Todo:jak company or agent ukryć combo z gender
             # TODO: gender combo logic
             # Gender 0 male 1 female
-            self.cmbGGender.setCurrentIndex(int(gGuest.Gender))
+            self.gender_cmb.setCurrentIndex(int(gGuest.Gender))
             # ----
             self.leGFirstName.setText(gGuest.FirstName)
             self.leGLastName.setText(gGuest.LastName)
@@ -202,13 +204,16 @@ class editGuest(QWidget):
             # ----
             self.leGIDNumber.setText(gGuest.IdNumber)
 
-    def guest_cmb_on_change(self):
+    def on_change_guest_cmb(self):
         if self.guest_type_combo.currentIndex() == 0:
             self.legIdNumberLabel.setText('ID number')
-            self.cmbGGender.show()
+            self.gender_cmb.show()
+            self.gender_label.show()
         else:
             self.legIdNumberLabel.setText('Cmp. number')
-            self.cmbGGender.setVisible(0)
+            self.gender_cmb.setVisible(0)
+            self.gender_label.setVisible(0)
+
 
     def create_form(self):
         form_layout = QFormLayout()
@@ -218,12 +223,12 @@ class editGuest(QWidget):
         # ----
         guest_type_strings = ['Guest', 'Company', 'Agent']
         self.guest_type_combo.addItems(guest_type_strings)
-        self.guest_type_combo.currentTextChanged.connect(self.guest_cmb_on_change)
+        self.guest_type_combo.currentTextChanged.connect(self.on_change_guest_cmb)
 
         # ----
         gender_strings = ['Mr.', 'Mrs.']
-        self.cmbGGender.addItems(gender_strings)
-
+        self.gender_cmb.addItems(gender_strings)
+        self.gender_label = QLabel('Gender')
         # Todo:add separator
         # ----
         #TODO: wyciąnąć guest_type koło leGuestID, zmienić logikę
@@ -236,7 +241,7 @@ class editGuest(QWidget):
         hv.addWidget(self.guest_type_combo)
         form_layout.addRow(hv)
 
-        form_layout.addRow('Guest type', self.cmbGGender)
+        form_layout.addRow(self.gender_label, self.gender_cmb)
         form_layout.addRow('First name:', self.leGFirstName)
         form_layout.addRow('Last name:', self.leGLastName)
         form_layout.addRow('Phone no.:', self.leGPhoneNumber)
@@ -268,9 +273,7 @@ class editGuest(QWidget):
 if __name__ == "__main__":
     import sys
 
-    con = Controller()
-    a = con.get_by_id(227)
     app = QApplication(sys.argv)
-    MainWindow = editGuest(a)
+    MainWindow = editGuest()
     MainWindow.show()
     sys.exit(app.exec_())
