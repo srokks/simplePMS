@@ -81,7 +81,7 @@ class Guest:
         self.FamilyMemberID = []
         self.AddressID = ''
         if 'aList' in kwargs.keys():
-            '''Inicjowanie adresu z listy, jeżeli nie w kwargs a list to tylko inicjuje puste'''
+            '''Inicjowanie adresu z listy, jeżeli nie w kwargs app_path list to tylko inicjuje puste'''
             Address.__init__(self, aList=kwargs['aList'])
         else:
             Address.__init__(self)
