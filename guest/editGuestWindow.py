@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
 
 )
 
-from Guest import Guest
+
 from PyQt5.QtCore import Qt, QRegExp
 
 
@@ -273,9 +273,7 @@ class editGuest(QWidget):
 if __name__ == "__main__":
     import sys
 
-    con = Controller()
-    a = con.get_by_id(227)
     app = QApplication(sys.argv)
-    MainWindow = editGuest(a)
+    MainWindow = editGuest()
     MainWindow.show()
     sys.exit(app.exec_())

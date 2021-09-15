@@ -16,10 +16,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMessageBox,
 )
-from guest import Guest
-from guest import editGuestWindow
-from guest import searchGuestWindow
-
+from room_rack.RoomRack import room_rack
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -28,20 +25,30 @@ class MainWindow(QMainWindow):
         search_btn.clicked.connect(self.showSearchGuest)
 
         new_btn = QPushButton('guest/editGuestWindow.py')
-        new_btn.clicked.connec2(self.showEditGuest)
+        new_btn.clicked.connect(self.showEditGuest)
+
+        room_rack_btn = QPushButton('room_rack')
+        room_rack_btn.clicked.connect(self.show_room_rack_on_click)
+
         but_layout = QVBoxLayout()
         but_layout.addWidget(search_btn)
         but_layout.addWidget(new_btn)
-        self.searchGuest = searchGuestWindow.searchGuest()
-        self.editGuest = editGuestWindow.editGuest()
+        but_layout.addWidget(room_rack_btn)
+        # self.searchGuest = searchGuestWindow.searchGuest()
+        # self.editGuest = editGuestWindow.editGuest()
+        self.room_rack_window = room_rack()
         wi = QWidget()
         wi.setLayout(but_layout)
         self.setCentralWidget(wi)
     def showSearchGuest(self):
-        self.searchGuest.show()
+        # self.searchGuest.show()
+        pass
     def showEditGuest(self):
-        self.editGuest.show()
-
+        # self.editGuest.show()
+        pass
+    def show_room_rack_on_click(self):
+        self.room_rack_window.show()
+        pass
 if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)

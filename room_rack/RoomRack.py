@@ -33,7 +33,7 @@ tile_height = 25
 tile_width = 75
 days_limit =25
 rooms = len(ROOMS)
-from dayTile import DayTile
+from room_rack.dayTile import DayTile
 
 class res_tile(QWidget):
     def __init__(self):
@@ -252,10 +252,10 @@ class room_rack(QWidget):
         pass
     
 
-
-app = QApplication(sys.argv)
-win = room_rack()
-win.move(0, 0)
-win.resize(800, 600)
-win.show()
-app.exec_()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = room_rack()
+    win.move(0, 0)
+    win.resize(800, 600)
+    win.show()
+    app.exec_()
