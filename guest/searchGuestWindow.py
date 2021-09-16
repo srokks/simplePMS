@@ -66,6 +66,7 @@ class SearchGuest(QWidget):
         self.guest_table.setEditTriggers(self.guest_table.NoEditTriggers)
         self.guest_table.setSelectionBehavior(self.guest_table.SelectRows)
         self.guest_table.doubleClicked.connect(self.table_on_dclick)
+        self.guest_table.verticalHeader().hide()
         self.model = QSqlQueryModel()
         self.guest_table.setModel(self.model)
 
