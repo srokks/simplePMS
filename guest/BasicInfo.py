@@ -1,30 +1,19 @@
-from operator import attrgetter
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import (
-    QDialog,
     QWidget,
-    QMainWindow,
-    QApplication,
     QHBoxLayout,
-    QVBoxLayout,
     QFormLayout,
-    QTabWidget,
     QLineEdit,
-    QPushButton,
-    QBoxLayout,
-    QTableWidget,
-    QTableWidgetItem,
     QComboBox,
     QLabel,
-    QMessageBox,
-
 )
 
-from PyQt5.QtCore import Qt, QRegExp
 from LineEdit import LineEdit
+
+
 class BasicInfo(QWidget):
     obligatories_checked = pyqtSignal(bool)
+
     def __init__(self):
         super(BasicInfo, self).__init__()
 
@@ -82,12 +71,14 @@ class BasicInfo(QWidget):
         self.setLayout(basic_info_lay)
         self.set_obligatories(self.obligatories_list)
         self.type_cmb.currentIndexChanged.connect(self.type_cmb_on_change)
-    def set_obligatories(self,list):
+
+    def set_obligatories(self, list):
         for el in list:
             el.setObligatory(True)
             el.textChanged.connect(self.check_obligatories)
+
     def type_cmb_on_change(self, index):
-        '''Change label on id_nubmer_lbl according to type of guest'''
+        """Change label on id_number_lbl according to type of guest"""
         if index == 0:
             '''sets labels for guest '''
             self.id_number_lbl.setText('ID number')
@@ -95,22 +86,23 @@ class BasicInfo(QWidget):
             self.id_number_le.setObligatory(False)
         elif index in [1, 2]:
             '''sets labels for company '''
-            #TODO: add address to obligatories
+            # TODO: add address to obligatories
             self.id_number_lbl.setText('Company ID')
-            self.obligatories_list.insert(0,self.id_number_le)
+            self.obligatories_list.insert(0, self.id_number_le)
             self.set_obligatories(self.obligatories_list)
-    def check_obligatories(self,e):
-        '''Checks if all items (LineEdits) witch are in obligatory_list arae with text
-        Except two last (phone no and mail) them are cheched '''
+
+    def check_obligatories(self, e):
+        """Checks if all items (LineEdits) witch are in obligatory_list are with text
+        Except two last (phone no and mail) them are checked """
         flag = False
         for el in self.obligatories_list[:-2]:
-            if el.text()!='':
-                flag=True
+            if el.text() != '':
+                flag = True
             else:
-                flag=False
+                flag = False
                 break
         if flag:
-            if self.obligatories_list[-1].text()=='' and self.obligatories_list[-2].text()=='':
+            if self.obligatories_list[-1].text() == '' and self.obligatories_list[-2].text() == '':
                 flag = False
         if flag:
             self.obligatories_checked.emit(True)
