@@ -16,11 +16,18 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMessageBox,
 )
+
+
+
+
+
+from guest.editGuestWindow import editGuest
 from room_rack.RoomRack import room_rack
+from guest.searchGuestWindow import SearchGuest
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
         search_btn = QPushButton('guest/searchGuestWindow.py')
         search_btn.clicked.connect(self.showSearchGuest)
 
@@ -34,17 +41,17 @@ class MainWindow(QMainWindow):
         but_layout.addWidget(search_btn)
         but_layout.addWidget(new_btn)
         but_layout.addWidget(room_rack_btn)
-        # self.searchGuest = searchGuestWindow.searchGuest()
-        # self.editGuest = editGuestWindow.editGuest()
+        self.searchGuest = SearchGuest()
+        self.editGuest = editGuest()
         self.room_rack_window = room_rack()
         wi = QWidget()
         wi.setLayout(but_layout)
         self.setCentralWidget(wi)
     def showSearchGuest(self):
-        # self.searchGuest.show()
+        self.searchGuest.show()
         pass
     def showEditGuest(self):
-        # self.editGuest.show()
+        self.editGuest.show()
         pass
     def show_room_rack_on_click(self):
         self.room_rack_window.show()

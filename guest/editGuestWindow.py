@@ -1,6 +1,7 @@
 from operator import attrgetter
-
+from PyQt5.QtCore import pyqtSignal,QDir
 from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtSql import QSqlQuery,QSqlDatabase
 from PyQt5.QtWidgets import (
     QDialog,
     QWidget,
@@ -21,259 +22,158 @@ from PyQt5.QtWidgets import (
 
 )
 
-
 from PyQt5.QtCore import Qt, QRegExp
+app_path= QDir().absolutePath().split('/')
+app_path = '/'.join(app_path[0:-1])
+db_path= app_path+'/db/test_db.db'
+db = QSqlDatabase('QSQLITE')
+db.setDatabaseName(db_path)
+db.open()
+
+from guest.Guest import Guest
 
 
-# TODO: validacja wprowadzonych danych użyciem QlineEdit
-class searchLineEdit(QLineEdit):
+from guest.BasicInfo import BasicInfo
+class ActionButtonsLayout(QVBoxLayout):
     def __init__(self):
-        super().__init__()
-        # self.setMinimumWidth(100)
-        # self.setMinimumWidth(20)
-        self.mandatory = False
+        super(ActionButtonsLayout, self).__init__()
 
-    def setMandatory(self):
-        self.mandatory = True
-        self.setStyleSheet("background-color: rgb(255,230,100)")
-        self.textChanged.connect(self.on_text_change)
+        self.new_btn = QPushButton("New")
+        self.new_btn.setDisabled(True)
 
-    def on_text_change(self):
+        self.addWidget(self.new_btn)
+        self.update_btn = QPushButton("Update")
+        self.update_btn.setDisabled(True)
+        self.addWidget(self.update_btn)
+        self.close_btn = QPushButton("Close")
+        self.close_btn.clicked.connect(self.on_close_click)
+        self.addWidget(self.close_btn)
+        self.addStretch()
+    def on_close_click(self):
         pass
-
-
-class actionButton(QPushButton):
-    def __init__(self):
-        super().__init__()
-        self.setMaximumWidth(200)
 
 
 class editGuest(QWidget):
     def __init__(self, gGuest=None):
         super().__init__()
-        # ----
-        self.con = Controller()
-        # ----
-        self.legGuestID = QLineEdit()
-        self.legGuestID.setFixedWidth(50)
-        self.guest_type_combo = QComboBox()
-        self.gender_cmb = QComboBox()
-        # ----
-        self.leGFirstName = searchLineEdit()
-        self.leGFirstName.setMandatory()
-        # ---
-        self.leGLastName = searchLineEdit()
-        self.leGLastName.setMandatory()
-        # ---
-        self.leGPhoneNumber = searchLineEdit()
-        #self.leGPhoneNumber.setInputMask('+ 99 999-999-999')
-        self.leGPhoneNumber.setCursorPosition(0)
-        # ---
-        self.leGMailAddress = searchLineEdit()
-        # ----
-        self.leGAddress = searchLineEdit()
-        self.leGAddress2 = searchLineEdit()
-        self.leGZipCode = searchLineEdit()
-        self.leGCity = searchLineEdit()
-        self.leGState = searchLineEdit()
-        self.leGCountry = searchLineEdit()
-        # ----
-        self.legIdNumberLabel = QLabel("ID number:")
-        self.leGIDNumber = QLineEdit()
-        # ---- Main window properties
-        self.setWindowTitle("Edit guest")
-        self.resize(200, 200)
-        # self.setMaximumWidth(500)
-        self.move(50, 100)
-        # self.setMaximumWidth(300)
-        # ----
-        self.general_layout = QHBoxLayout()
-        self.setLayout(self.general_layout)
-        self.create_form()
-        self.initGuest(gGuest)
-        self.add_action_button()
-        # ---- WIP ---
-        self.mandatory_fields_list = []
-        for el in self.findChildren(searchLineEdit):
-            if el.mandatory:
-                self.mandatory_fields_list.append(el)
-        for el in self.mandatory_fields_list:
-            if el.text() != '':
-                pass
+        main_layout = QHBoxLayout()
 
-    def get_guest_from_form(self):
-        updated_guest = Guest()
-        # ---
-        updated_guest.GuestType = self.guest_type_combo.currentIndex()
-        updated_guest.Gender = self.gender_cmb.currentIndex()
-        updated_guest.GuestID = int(self.legGuestID.text()) if self.legGuestID.text() != '' else None
-        updated_guest.FirstName = self.leGFirstName.text()
-        updated_guest.LastName = self.leGLastName.text()
-        updated_guest.PhoneNumber = self.leGPhoneNumber.text()
-        updated_guest.MailAddress = self.leGMailAddress.text()
-        # --- Addres get
-        updated_guest.Address = self.leGAddress.text()
-        updated_guest.Address2 = self.leGAddress2.text()
-        updated_guest.City = self.leGCity.text()
-        updated_guest.State = self.leGState.text()
-        updated_guest.ZipCode = self.leGZipCode.text()
-        updated_guest.Country = self.leGCountry.text()
-        updated_guest.gGender = self.guest_type_combo.currentIndex()
-        updated_guest.IdNumber = self.leGIDNumber.text()
-        return updated_guest
+        tab = QTabWidget()
 
-    def on_text_change(self):
-        print("check flags activateds")
+        main_layout.addWidget(tab)
+        self.basic_info = BasicInfo()
+        self.basic_info.first_name_le.text()
+        tab.addTab(self.basic_info, 'Basic')
+        tab.addTab(QWidget(), 'Family Members')
+        self.basic_info.obligatories_checked.connect(self.on_obligatories_checked)
+        self.action_btn_layout = ActionButtonsLayout()
+        self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
+        main_layout.addLayout(self.action_btn_layout)
+        self.setLayout(main_layout)
+        self.set_fake_data()
+    def new_btn_on_click(self):
+        # gather info -> prepare querry - > execute querry -> init window with guest
 
-    def updatedMessageBox(self):
-        msg = QMessageBox()
-        msg.setText("Information updated")
-        msg.setStandardButtons(QMessageBox.Ok)
-        retval = msg.exec_()
-    def created_msg_box(self,guest):
-        msg = QMessageBox()
-        msg.setText(f"Created entry for {guest.FirstName},{guest.LastName}")
-        msg.setStandardButtons(QMessageBox.Ok)
-        retval = msg.exec_()
-    def on_click_update_btn(self):
-        #TODO: implement for new db
-        new_guest = self.get_guest_from_form()
-        if self.con.update_guest(new_guest):
-            self.updatedMessageBox()
+        self.gather_data()
+        self.prepare_querry()
+        pass
+    def add_guest(self):
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "INSERT INTO "
+            "tblGuest(gGuestType,gGender,gFirstName,gLastName,gPhoneNumber,gMailAddress,gIDNumber,gAddressID) "
+            "VALUES (:guest_type,:gender,:first_name,:last_name,:phone_number,:mail_address,:id_number,:address_id)"
+
+        )
+        querry.bindValue(":guest_type", self.new_guest.type)
+        querry.bindValue(':gender', self.new_guest.gender)
+        querry.bindValue(':first_name', self.new_guest.first_name)
+        querry.bindValue(':last_name', self.new_guest.last_name)
+        querry.bindValue(':phone_number', self.new_guest.phone_number)
+        querry.bindValue(':mail_address', self.new_guest.mail_address)
+        querry.bindValue(':id_number', self.new_guest.id_number)
+        querry.bindValue(':address_id', self.new_guest.address_id)
+
+        if querry.exec_():
+            print("addres added")
+            self.new_guest.address_id = querry.lastInsertId()
+            return True
         else:
-            print('problem')
-    def on_click_new_btn(self):
-        new_guest = self.get_guest_from_form()
-        self.con.add(new_guest)
-        self.initGuest(new_guest)
-        self.created_msg_box(new_guest)
-    def close_btn_on_click(self):
-        self.close()
-    def add_action_button(self):
-        VLayout = QVBoxLayout()
-        # ----
-        new_bnt = actionButton()
-        new_bnt.setText('New')
-        new_bnt.clicked.connect(self.on_click_new_btn)
-        # ----
-        self.update_btn = actionButton()
-        self.update_btn.setText('Modify')
-        self.update_btn.clicked.connect(self.on_click_update_btn)
-        self.update_btn.setEnabled(False)
-        # ----
-        # TODO: delete guest event
-        delete_btn = actionButton()
-        delete_btn.setText('Delete')
-        # ----
-        close_btn = actionButton()
-        close_btn.setText('Exit')
-        close_btn.clicked.connect(self.close_btn_on_click)
-        # ----
-        VLayout.addWidget(new_bnt)
-        VLayout.addWidget(self.update_btn)
-        VLayout.addWidget(delete_btn)
-        VLayout.addWidget(close_btn)
-        VLayout.addStretch()
-        self.general_layout.addLayout(VLayout)
+            print('error ', querry.lastError().text())
+            return False, querry.lastError().text()
+    def add_address(self):
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "INSERT INTO tblAddresses(aAddress,aAddress2,aCity,aState,aZipCode,aCountry) "
+            "VALUES (:address,:address2,:city,:state,:zip_code,:country)"
 
-    def initGuest(self, gGuest):
-        '''Enters gGuest attributes into form'''
-        if gGuest == None:
-            pass
+        )
+        querry.bindValue(":address",self.new_guest.address)
+        querry.bindValue(":address2",self.new_guest.address2)
+        querry.bindValue(":city",self.new_guest.city)
+        querry.bindValue(":state",self.new_guest.state)
+        querry.bindValue(":zip_code",self.new_guest.zip_code)
+        querry.bindValue(":country",self.new_guest.country)
+        if querry.exec_():
+            print("addres added")
+            self.new_guest.address_id = querry.lastInsertId()
+            return True
         else:
-            # ----
-            self.legGuestID.setText(str(gGuest.GuestID))
-            # Guest type - 0 - Guest ; 1 - company;2 agent
-            self.guest_type_combo.setCurrentIndex(gGuest.GuestType)
-            # Todo:jak company or agent ukryć combo z gender
-            # TODO: gender combo logic
-            # Gender 0 male 1 female
-            self.gender_cmb.setCurrentIndex(int(gGuest.Gender))
-            # ----
-            self.leGFirstName.setText(gGuest.FirstName)
-            self.leGLastName.setText(gGuest.LastName)
-            self.leGPhoneNumber.setText(gGuest.PhoneNumber)
-            self.leGMailAddress.setText(gGuest.MailAddress)
-            # ----
-            self.leGAddress.setText(gGuest.Address)
-            self.leGAddress2.setText(gGuest.Address2)
-            self.leGZipCode.setText(gGuest.ZipCode)
-            self.leGCity.setText(gGuest.City)
-            self.leGState.setText(gGuest.State)
-            self.leGCountry.setText(gGuest.Country)
-            # ----
-            self.leGIDNumber.setText(gGuest.IdNumber)
+            print('error ',querry.lastError().text())
+            return False,querry.lastError().text()
 
-    def on_change_guest_cmb(self):
-        if self.guest_type_combo.currentIndex() == 0:
-            self.legIdNumberLabel.setText('ID number')
-            self.gender_cmb.show()
-            self.gender_label.show()
+
+    def prepare_querry(self):
+        if self.new_guest.address != '' or self.new_guest.address2 != '' or self.new_guest.city != '' or self.new_guest.state != '' or self.new_guest.zip_code != '' or self.new_guest.country != '':
+            if self.add_address() or self.add_guest():
+                print('guest + address added')
         else:
-            self.legIdNumberLabel.setText('Cmp. number')
-            self.gender_cmb.setVisible(0)
-            self.gender_label.setVisible(0)
+            if self.add_guest():
+                print('guest added')
 
+    def set_fake_data(self):
+        self.basic_info.first_name_le.setText("Jarosław")
+        self.basic_info.last_name_le.setText("Sroka")
+        self.basic_info.phone_number_le.setText("123-432-123")
+        self.basic_info.mail_address_le.setText("sroka@sroka.pl")
+        self.basic_info.id_number_le.setText("AWG123432")
 
-    def create_form(self):
-        form_layout = QFormLayout()
-        tab_widget = QTabWidget()
-        tab_widget.setMaximumWidth(350)
-        form_layout.setContentsMargins(5, 5, -5, 5)
-        # ----
-        guest_type_strings = ['Guest', 'Company', 'Agent']
-        self.guest_type_combo.addItems(guest_type_strings)
-        self.guest_type_combo.currentTextChanged.connect(self.on_change_guest_cmb)
+        self.basic_info.address_le.setText("Bitwy Warszawskiej")
+        self.basic_info.address2_le.setText("12/12")
+        self.basic_info.city_le.setText("Warszawa")
+        self.basic_info.state_le.setText("mazowieckie")
+        self.basic_info.zip_code_le.setText("02-366")
+        self.basic_info.country_le.setText("Polska")
 
-        # ----
-        gender_strings = ['Mr.', 'Mrs.']
-        self.gender_cmb.addItems(gender_strings)
-        self.gender_label = QLabel('Gender')
-        # Todo:add separator
-        # ----
-        #TODO: wyciąnąć guest_type koło leGuestID, zmienić logikę
-        self.legGuestID.setEnabled(False)
-        form_layout.setLabelAlignment(Qt.AlignLeft)
-        form_layout.setFormAlignment(Qt.AlignRight)
-        hv = QHBoxLayout()
-        hv.addWidget(self.legGuestID)
-        hv.addWidget(QLabel('Guest type:'))
-        hv.addWidget(self.guest_type_combo)
-        form_layout.addRow(hv)
+    def gather_data(self):
+        self.new_guest = Guest()
+        self.new_guest.type = self.basic_info.type_cmb.currentIndex()
+        self.new_guest.gender = self.basic_info.gender_cmb.currentIndex()
+        self.new_guest.first_name = self.basic_info.first_name_le.text()
+        self.new_guest.last_name = self.basic_info.last_name_le.text()
+        self.new_guest.phone_number = self.basic_info.phone_number_le.text()
+        self.new_guest.mail_address = self.basic_info.mail_address_le.text()
+        #TODO:address logic
+        self.new_guest.address_id = None
+        self.new_guest.address = self.basic_info.address_le.text()
+        self.new_guest.address2 = self.basic_info.address2_le.text()
+        self.new_guest.city = self.basic_info.city_le.text()
+        self.new_guest.state = self.basic_info.state_le.text()
+        self.new_guest.zip_code = self.basic_info.zip_code_le.text()
+        self.new_guest.country = self.basic_info.country_le.text()
+        self.new_guest.id_number = self.basic_info.id_number_le.text()
 
-        form_layout.addRow(self.gender_label, self.gender_cmb)
-        form_layout.addRow('First name:', self.leGFirstName)
-        form_layout.addRow('Last name:', self.leGLastName)
-        form_layout.addRow('Phone no.:', self.leGPhoneNumber)
-        form_layout.addRow('Mail address:', self.leGMailAddress)
-        # TODO:add separator
-
-        form_layout.addRow('Address:', self.leGAddress)
-        form_layout.addRow('Address ...:', self.leGAddress2)
-        form_layout.addRow('Zip code:', self.leGZipCode)
-        form_layout.addRow('City:', self.leGCity)
-        form_layout.addRow('State:', self.leGState)
-        form_layout.addRow('Country:', self.leGCountry)
-        # Todo:add separator
-
-        form_layout.addRow(self.legIdNumberLabel, self.leGIDNumber)
-        masted_data_widget = QWidget()
-        masted_data_widget.setLayout(form_layout)
-        family_members = QWidget()
-        family_members2 = QWidget()
-        tab_widget.addTab(masted_data_widget, 'Master data')
-        tab_widget.addTab(family_members, 'Family Members')
-        self.general_layout.addWidget(tab_widget)
-
-    def check_obligatories(self):
-        a = self.findChildren(searchLineEdit)
-        print(a)
-
-
+    def on_obligatories_checked(self,e):
+        if e:
+            self.action_btn_layout.new_btn.setDisabled(False)
+        else:
+            self.action_btn_layout.new_btn.setDisabled(True)
 if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
     MainWindow = editGuest()
+    MainWindow.move(0, 0)
+    MainWindow.resize(200, 400)
     MainWindow.show()
     sys.exit(app.exec_())
