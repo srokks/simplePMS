@@ -149,6 +149,7 @@ class BasicInfo(QWidget):
             self.obligatories_checked.emit(True)
         else:
             self.obligatories_checked.emit(False)
+
 class editGuest(QWidget):
     def __init__(self, gGuest=None):
         super(editGuest, self).__init__()
@@ -157,15 +158,38 @@ class editGuest(QWidget):
         tab = QTabWidget()
 
         main_layout.addWidget(tab)
-        basic_info = BasicInfo()
-        basic_info.first_name_le.text()
-        tab.addTab(basic_info, 'Basic')
+        self.basic_info = BasicInfo()
+        self.basic_info.first_name_le.text()
+        tab.addTab(self.basic_info, 'Basic')
         tab.addTab(QWidget(), 'Family Members')
-        basic_info.obligatories_checked.connect(self.on_obligatories_checked)
+        self.basic_info.obligatories_checked.connect(self.on_obligatories_checked)
         self.action_btn_layout = ActionButtonsLayout()
-
+        self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
         main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
+    def new_btn_on_click(self):
+        # gather info -> prepare querry - > execute querry -> init window with guest
+        self.gather_data()
+        self.prepare_querry()
+        pass
+    def prepare_querry(self):
+        if self.address == ''
+    def gather_data(self):
+        self.type = self.basic_info.type_cmb.currentIndex()
+        self.gender = self.basic_info.gender_cmb.currentIndex()
+        self.first_name = self.basic_info.first_name_le.text()
+        self.last_name = self.basic_info.last_name_le.text()
+        self.phone_number = self.basic_info.phone_number_le.text()
+        self.mail_address = self.basic_info.mail_address_le.text()
+
+        self.address = self.basic_info.address_le.text()
+        self.address2 = self.basic_info.address2_le.text()
+        self.city = self.basic_info.city_le.text()
+        self.state = self.basic_info.state_le.text()
+        self.zip_code = self.basic_info.zip_code_le.text()
+        self.country = self.basic_info.country_le.text()
+        self.id_number = self.basic_info.id_number_le.text()
+
     def on_obligatories_checked(self,e):
         if e:
             self.action_btn_layout.new_btn.setDisabled(False)

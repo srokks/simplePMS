@@ -27,7 +27,7 @@ class Address:
         if "aAddressList" in kwargs.keys():
             '''
             Inits attributes by list, musty be initiated by aAddressList in kwargs.
-            Used to init instance from db fetched data.
+            Used to init instance from db fetched _data.
             '''
             self.aAddressList = kwargs['aAddressList']
             if len(self.aAddressList) != len(self.address_tbl_pattern):
