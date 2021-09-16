@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QLabel,
 )
 
-from LineEdit import LineEdit
+from guest.LineEdit import LineEdit
 
 
 class BasicInfo(QWidget):

@@ -165,10 +165,8 @@ class room_rack(QWidget):
         room_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         room_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         room_scroll.setMaximumWidth(tile_width)
-        print(room_scroll.sizeHint())
         room_wi = QWidget()
         self.room_lay = QVBoxLayout()
-        print(room_wi.size())
         self.room_lay.setSpacing(0)
         self.room_lay.setContentsMargins(0, 0, 0, 0)
         for el in ROOMS:

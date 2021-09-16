@@ -30,10 +30,10 @@ db = QSqlDatabase('QSQLITE')
 db.setDatabaseName(db_path)
 db.open()
 
-from Guest import Guest
+from guest.Guest import Guest
 
 
-from BasicInfo import BasicInfo
+from guest.BasicInfo import BasicInfo
 class ActionButtonsLayout(QVBoxLayout):
     def __init__(self):
         super(ActionButtonsLayout, self).__init__()
@@ -50,12 +50,12 @@ class ActionButtonsLayout(QVBoxLayout):
         self.addWidget(self.close_btn)
         self.addStretch()
     def on_close_click(self):
-        self.close()
+        pass
 
 
 class editGuest(QWidget):
     def __init__(self, gGuest=None):
-        super(editGuest, self).__init__()
+        super().__init__()
         main_layout = QHBoxLayout()
 
         tab = QTabWidget()

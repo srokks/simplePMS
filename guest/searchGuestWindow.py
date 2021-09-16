@@ -20,22 +20,21 @@ QTableView,
     QLabel,
     QFrame, QDataWidgetMapper,
 )
-app_path= QDir().absolutePath().split('/')
-app_path = '/'.join(app_path[0:-1])
-db_path= app_path+'/db/test_db.db'
-db = QSqlDatabase('QSQLITE')
-db.setDatabaseName(db_path)
-db.open()
 
 
+
+from guest.editGuestWindow import editGuest
+from db.Connection import Connection
 class QHBoxLayout(QHBoxLayout):
     def __init__(self):
         super(QHBoxLayout, self).__init__()
         self.setSpacing(1)
 
 class SearchGuest(QWidget):
+
     def __init__(self):
         super(SearchGuest, self).__init__()
+        self.db = Connection().db
         main_layout = QVBoxLayout()
         search_lines_layout  = QHBoxLayout()
         self.last_name_search = QLineEdit()
@@ -70,7 +69,7 @@ class SearchGuest(QWidget):
         self.model = QSqlQueryModel()
         self.guest_table.setModel(self.model)
 
-        self.query = QSqlQuery(db=db)
+        self.query = QSqlQuery(db=self.db)
         self.query.prepare(
             "SELECT gGuestID,gFirstName,gLastName ,aCity,gPhoneNumber,gMailAddress FROM tblGuest "
             "INNER JOIN tblAddresses ON tblGuest.gAddressID = tblAddresses.aAddressID "
@@ -87,6 +86,9 @@ class SearchGuest(QWidget):
         self.setLayout(main_layout)
 
     def table_on_dclick(self,e):
+        dialog = editGuest(self)
+
+        dialog.show()
         print(self.model.index(e.row(),0).data())
 
 
@@ -103,6 +105,8 @@ class SearchGuest(QWidget):
     def search_on_click(self,e):
         # print(self.query.)
         self.update_querry()
+
+
 if __name__ == "__main__":
     import sys
 
