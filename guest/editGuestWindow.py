@@ -1,5 +1,5 @@
 from operator import attrgetter
-
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import (
     QDialog,
@@ -25,18 +25,22 @@ from PyQt5.QtCore import Qt, QRegExp
 
 
 class LineEdit(QLineEdit):
-    def __init__(self,obligatory=False):
+
+    def __init__(self):
         super(LineEdit, self).__init__()
-        self.obligatory = obligatory
+        self.setMinimumWidth(100)
+        self.setMaximumWidth(220)
+        self.obligatory = False
         self.setObligatory()
-        self.textChanged.connect(self.setObligatory)
-    def setObligatory(self):
+    def setObligatory(self,obligatory=False):
+        self.obligatory = obligatory
         if self.obligatory == True:
             self.setStyleSheet('background-color:rgba(255, 238, 0,90)')
         else:
             self.setStyleSheet('background-color:rgb(255, 255, 255)')
 
 class BasicInfo(QWidget):
+    obligatories_checked = pyqtSignal(bool)
     def __init__(self):
         super(BasicInfo, self).__init__()
 
@@ -61,12 +65,14 @@ class BasicInfo(QWidget):
         id_type_lay.addStretch()
         id_type_lay.addWidget(self.type_cmb)
 
-        self.first_name_le = LineEdit(True)
-        self.first_name_le.setMinimumWidth(100)
-        self.last_name_le = QLineEdit()
-        self.phone_number_le = QLineEdit()
-        self.mail_address_le = QLineEdit()
-        self.id_number_le = QLineEdit()
+        self.first_name_le = LineEdit()
+        self.last_name_le = LineEdit()
+        self.phone_number_le = LineEdit()
+        self.mail_address_le = LineEdit()
+        'group of obligatory line edits, last two checked as or'
+        self.obligatories_list = [self.first_name_le, self.last_name_le, self.phone_number_le, self.mail_address_le]
+
+        self.id_number_le = LineEdit()
 
         self.address_le = QLineEdit()
         self.address2_le = QLineEdit()
@@ -90,16 +96,42 @@ class BasicInfo(QWidget):
         basic_info_lay.addRow("Country:", self.country_le)
         basic_info_lay.addRow(self.id_number_lbl, self.id_number_le)
         self.setLayout(basic_info_lay)
-
+        self.set_obligatories(self.obligatories_list)
         self.type_cmb.currentIndexChanged.connect(self.type_cmb_on_change)
-
+    def set_obligatories(self,list):
+        for el in list:
+            el.setObligatory(True)
+            el.textChanged.connect(self.check_obligatories)
     def type_cmb_on_change(self, index):
+        '''Change label on id_nubmer_lbl according to type of guest'''
         if index == 0:
+            '''sets labels for guest '''
             self.id_number_lbl.setText('ID number')
+            self.obligatories_list.pop(0)
+            self.id_number_le.setObligatory(False)
         elif index in [1, 2]:
+            '''sets labels for company '''
+            #TODO: add address to obligatories
             self.id_number_lbl.setText('Company ID')
-
-
+            self.obligatories_list.insert(0,self.id_number_le)
+            self.set_obligatories(self.obligatories_list)
+    def check_obligatories(self,e):
+        '''Checks if all items (LineEdits) witch are in obligatory_list arae with text
+        Except two last (phone no and mail) them are cheched '''
+        flag = False
+        for el in self.obligatories_list[:-2]:
+            if el.text()!='':
+                flag=True
+            else:
+                flag=False
+                break
+        if flag:
+            if self.obligatories_list[-1].text()=='' and self.obligatories_list[-2].text()=='':
+                flag = False
+        if flag:
+            self.obligatories_checked.emit(True)
+        else:
+            self.obligatories_checked.emit(False)
 class editGuest(QWidget):
     def __init__(self, gGuest=None):
         super(editGuest, self).__init__()
@@ -114,15 +146,27 @@ class editGuest(QWidget):
         tab.addTab(QWidget(), 'Family Members')
 
         action_btn_layout = QVBoxLayout()
-        action_btn_layout.addWidget(QPushButton("New"))
-        action_btn_layout.addWidget(QPushButton("Update"))
-        action_btn_layout.addWidget(QPushButton("Close"))
+        self.new_btn = QPushButton("New")
+        self.new_btn.setDisabled(True)
+        basic_info.obligatories_checked.connect(self.on_obligatories_checked)
+        action_btn_layout.addWidget(self.new_btn)
+        self.update_btn = QPushButton("Update")
+        self.update_btn.setDisabled(True)
+        action_btn_layout.addWidget(self.update_btn)
+        self.close_btn = QPushButton("Close")
+        self.close_btn.clicked.connect(self.on_close_click)
+        action_btn_layout.addWidget(self.close_btn)
         action_btn_layout.addStretch()
 
         main_layout.addLayout(action_btn_layout)
         self.setLayout(main_layout)
-
-
+    def on_close_click(self):
+        self.close()
+    def on_obligatories_checked(self,e):
+        if e:
+            self.new_btn.setDisabled(False)
+        else:
+            self.new_btn.setDisabled(True)
 if __name__ == "__main__":
     import sys
 
