@@ -38,6 +38,23 @@ class LineEdit(QLineEdit):
             self.setStyleSheet('background-color:rgba(255, 238, 0,90)')
         else:
             self.setStyleSheet('background-color:rgb(255, 255, 255)')
+class ActionButtonsLayout(QVBoxLayout):
+    def __init__(self):
+        super(ActionButtonsLayout, self).__init__()
+
+        self.new_btn = QPushButton("New")
+        self.new_btn.setDisabled(True)
+
+        self.addWidget(self.new_btn)
+        self.update_btn = QPushButton("Update")
+        self.update_btn.setDisabled(True)
+        self.addWidget(self.update_btn)
+        self.close_btn = QPushButton("Close")
+        self.close_btn.clicked.connect(self.on_close_click)
+        self.addWidget(self.close_btn)
+        self.addStretch()
+    def on_close_click(self):
+        self.close()
 
 class BasicInfo(QWidget):
     obligatories_checked = pyqtSignal(bool)
@@ -144,29 +161,16 @@ class editGuest(QWidget):
         basic_info.first_name_le.text()
         tab.addTab(basic_info, 'Basic')
         tab.addTab(QWidget(), 'Family Members')
-
-        action_btn_layout = QVBoxLayout()
-        self.new_btn = QPushButton("New")
-        self.new_btn.setDisabled(True)
         basic_info.obligatories_checked.connect(self.on_obligatories_checked)
-        action_btn_layout.addWidget(self.new_btn)
-        self.update_btn = QPushButton("Update")
-        self.update_btn.setDisabled(True)
-        action_btn_layout.addWidget(self.update_btn)
-        self.close_btn = QPushButton("Close")
-        self.close_btn.clicked.connect(self.on_close_click)
-        action_btn_layout.addWidget(self.close_btn)
-        action_btn_layout.addStretch()
+        self.action_btn_layout = ActionButtonsLayout()
 
-        main_layout.addLayout(action_btn_layout)
+        main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
-    def on_close_click(self):
-        self.close()
     def on_obligatories_checked(self,e):
         if e:
-            self.new_btn.setDisabled(False)
+            self.action_btn_layout.new_btn.setDisabled(False)
         else:
-            self.new_btn.setDisabled(True)
+            self.action_btn_layout.new_btn.setDisabled(True)
 if __name__ == "__main__":
     import sys
 
