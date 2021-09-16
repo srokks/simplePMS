@@ -1,6 +1,7 @@
 from operator import attrgetter
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal,QDir
 from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtSql import QSqlQuery,QSqlDatabase
 from PyQt5.QtWidgets import (
     QDialog,
     QWidget,
@@ -22,6 +23,14 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtCore import Qt, QRegExp
+app_path= QDir().absolutePath().split('/')
+app_path = '/'.join(app_path[0:-1])
+db_path= app_path+'/db/test_db.db'
+db = QSqlDatabase('QSQLITE')
+db.setDatabaseName(db_path)
+db.open()
+
+from Guest import Guest
 
 
 from BasicInfo import BasicInfo
@@ -68,9 +77,59 @@ class editGuest(QWidget):
         self.gather_data()
         self.prepare_querry()
         pass
+    def add_guest(self):
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "INSERT INTO "
+            "tblGuest(gGuestType,gGender,gFirstName,gLastName,gPhoneNumber,gMailAddress,gIDNumber,gAddressID) "
+            "VALUES (:guest_type,:gender,:first_name,:last_name,:phone_number,:mail_address,:id_number,:address_id)"
+
+        )
+        querry.bindValue(":guest_type", self.new_guest.type)
+        querry.bindValue(':gender', self.new_guest.gender)
+        querry.bindValue(':first_name', self.new_guest.first_name)
+        querry.bindValue(':last_name', self.new_guest.last_name)
+        querry.bindValue(':phone_number', self.new_guest.phone_number)
+        querry.bindValue(':mail_address', self.new_guest.mail_address)
+        querry.bindValue(':id_number', self.new_guest.id_number)
+        querry.bindValue(':address_id', self.new_guest.address_id)
+
+        if querry.exec_():
+            print("addres added")
+            self.new_guest.address_id = querry.lastInsertId()
+            return True
+        else:
+            print('error ', querry.lastError().text())
+            return False, querry.lastError().text()
+    def add_address(self):
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "INSERT INTO tblAddresses(aAddress,aAddress2,aCity,aState,aZipCode,aCountry) "
+            "VALUES (:address,:address2,:city,:state,:zip_code,:country)"
+
+        )
+        querry.bindValue(":address",self.new_guest.address)
+        querry.bindValue(":address2",self.new_guest.address2)
+        querry.bindValue(":city",self.new_guest.city)
+        querry.bindValue(":state",self.new_guest.state)
+        querry.bindValue(":zip_code",self.new_guest.zip_code)
+        querry.bindValue(":country",self.new_guest.country)
+        if querry.exec_():
+            print("addres added")
+            self.new_guest.address_id = querry.lastInsertId()
+            return True
+        else:
+            print('error ',querry.lastError().text())
+            return False,querry.lastError().text()
+
+
     def prepare_querry(self):
-        if self.address != '' or self.address2 != '' or self.city != '' or self.state != '' or self.zip_code != '' or self.country != '':
-            pass
+        if self.new_guest.address != '' or self.new_guest.address2 != '' or self.new_guest.city != '' or self.new_guest.state != '' or self.new_guest.zip_code != '' or self.new_guest.country != '':
+            if self.add_address() or self.add_guest():
+                print('guest + address added')
+        else:
+            if self.add_guest():
+                print('guest added')
 
     def set_fake_data(self):
         self.basic_info.first_name_le.setText("Jarosław")
@@ -79,28 +138,30 @@ class editGuest(QWidget):
         self.basic_info.mail_address_le.setText("sroka@sroka.pl")
         self.basic_info.id_number_le.setText("AWG123432")
 
-        # self.basic_info.address_le.setText("Bitwy Warszawskiej")
-        # self.basic_info.address2_le.setText("12/12")
-        # self.basic_info.city_le.setText("Warszawa")
-        # self.basic_info.state_le.setText("mazowieckie")
-        # self.basic_info.zip_code_le.setText("02-366")
-        # self.basic_info.country_le.setText("Polska")
+        self.basic_info.address_le.setText("Bitwy Warszawskiej")
+        self.basic_info.address2_le.setText("12/12")
+        self.basic_info.city_le.setText("Warszawa")
+        self.basic_info.state_le.setText("mazowieckie")
+        self.basic_info.zip_code_le.setText("02-366")
+        self.basic_info.country_le.setText("Polska")
 
     def gather_data(self):
-        self.type = self.basic_info.type_cmb.currentIndex()
-        self.gender = self.basic_info.gender_cmb.currentIndex()
-        self.first_name = self.basic_info.first_name_le.text()
-        self.last_name = self.basic_info.last_name_le.text()
-        self.phone_number = self.basic_info.phone_number_le.text()
-        self.mail_address = self.basic_info.mail_address_le.text()
-
-        self.address = self.basic_info.address_le.text()
-        self.address2 = self.basic_info.address2_le.text()
-        self.city = self.basic_info.city_le.text()
-        self.state = self.basic_info.state_le.text()
-        self.zip_code = self.basic_info.zip_code_le.text()
-        self.country = self.basic_info.country_le.text()
-        self.id_number = self.basic_info.id_number_le.text()
+        self.new_guest = Guest()
+        self.new_guest.type = self.basic_info.type_cmb.currentIndex()
+        self.new_guest.gender = self.basic_info.gender_cmb.currentIndex()
+        self.new_guest.first_name = self.basic_info.first_name_le.text()
+        self.new_guest.last_name = self.basic_info.last_name_le.text()
+        self.new_guest.phone_number = self.basic_info.phone_number_le.text()
+        self.new_guest.mail_address = self.basic_info.mail_address_le.text()
+        #TODO:address logic
+        self.new_guest.address_id = None
+        self.new_guest.address = self.basic_info.address_le.text()
+        self.new_guest.address2 = self.basic_info.address2_le.text()
+        self.new_guest.city = self.basic_info.city_le.text()
+        self.new_guest.state = self.basic_info.state_le.text()
+        self.new_guest.zip_code = self.basic_info.zip_code_le.text()
+        self.new_guest.country = self.basic_info.country_le.text()
+        self.new_guest.id_number = self.basic_info.id_number_le.text()
 
     def on_obligatories_checked(self,e):
         if e:
