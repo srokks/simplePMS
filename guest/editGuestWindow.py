@@ -35,7 +35,9 @@ from guest.Guest import Guest
 
 from guest.BasicInfo import BasicInfo
 class ActionButtonsLayout(QVBoxLayout):
+    close_btn_signal = pyqtSignal()
     def __init__(self):
+
         super(ActionButtonsLayout, self).__init__()
 
         self.new_btn = QPushButton("New")
@@ -46,11 +48,11 @@ class ActionButtonsLayout(QVBoxLayout):
         self.update_btn.setDisabled(True)
         self.addWidget(self.update_btn)
         self.close_btn = QPushButton("Close")
-        self.close_btn.clicked.connect(self.on_close_click)
+        self.close_btn.clicked.connect(self.close_btn_signal.emit)
         self.addWidget(self.close_btn)
         self.addStretch()
-    def on_close_click(self):
-        pass
+
+
 
 
 class editGuest(QWidget):
@@ -67,6 +69,7 @@ class editGuest(QWidget):
         tab.addTab(QWidget(), 'Family Members')
         self.basic_info.obligatories_checked.connect(self.on_obligatories_checked)
         self.action_btn_layout = ActionButtonsLayout()
+        self.action_btn_layout.close_btn_signal.connect(self.close)
         self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
         main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
