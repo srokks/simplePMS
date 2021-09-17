@@ -22,7 +22,7 @@ QTableView,
 )
 
 
-
+from guest.Guest import Guest
 from guest.editGuestWindow import editGuest
 from db.Connection import Connection
 class QHBoxLayout(QHBoxLayout):
@@ -86,10 +86,11 @@ class SearchGuest(QWidget):
         self.setLayout(main_layout)
 
     def table_on_dclick(self,e):
-        dialog = editGuest(self)
+        temp_guest = Guest()
+        temp_guest.fetch_by_id(self.model.index(e.row(),0).data())
+        self.dialog = editGuest(temp_guest)
+        self.dialog.show()
 
-        dialog.show()
-        print(self.model.index(e.row(),0).data())
 
 
     def update_querry(self):
