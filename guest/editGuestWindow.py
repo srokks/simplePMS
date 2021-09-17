@@ -54,7 +54,7 @@ class ActionButtonsLayout(QVBoxLayout):
 
 
 class editGuest(QWidget):
-    def __init__(self, gGuest=None):
+    def __init__(self, guest=None):
         super().__init__()
         main_layout = QHBoxLayout()
 
@@ -70,7 +70,22 @@ class editGuest(QWidget):
         self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
         main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
-        self.set_fake_data()
+        self.init_guest(guest)
+    def init_guest(self,guest):
+        print(guest.first_name)
+        self.basic_info.guest_id_le.setText(str(guest.guest_id))
+        self.basic_info.first_name_le.setText(guest.first_name)
+        self.basic_info.last_name_le.setText(guest.last_name)
+        self.basic_info.phone_number_le.setText(guest.phone_number)
+        self.basic_info.mail_address_le.setText(guest.mail_address)
+        self.basic_info.address_le.setText(guest.address)
+        self.basic_info.address2_le.setText(guest.address2)
+        self.basic_info.city_le.setText(guest.city)
+        self.basic_info.state_le.setText(guest.state)
+        self.basic_info.zip_code_le.setText(guest.zip_code)
+        self.basic_info.country_le.setText(guest.country)
+        self.basic_info.id_number_le.setText(guest.id_number)
+
     def new_btn_on_click(self):
         # gather info -> prepare querry - > execute querry -> init window with guest
 
@@ -170,9 +185,11 @@ class editGuest(QWidget):
             self.action_btn_layout.new_btn.setDisabled(True)
 if __name__ == "__main__":
     import sys
-
+    temp_guest = Guest()
+    temp_guest.fetch_by_id(500)
+    # print(temp_guest.first_name)
     app = QApplication(sys.argv)
-    MainWindow = editGuest()
+    MainWindow = editGuest(temp_guest)
     MainWindow.move(0, 0)
     MainWindow.resize(200, 400)
     MainWindow.show()
