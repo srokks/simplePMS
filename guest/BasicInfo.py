@@ -20,9 +20,9 @@ class BasicInfo(QWidget):
         basic_info_lay = QFormLayout()
         basic_info_lay.setContentsMargins(10, 10, 10, 10)
 
-        self.guest_id = QLineEdit()
-        self.guest_id.setMaximumWidth(50)
-        self.guest_id.setDisabled(True)
+        self.guest_id_le = QLineEdit()
+        self.guest_id_le.setMaximumWidth(50)
+        self.guest_id_le.setDisabled(True)
 
         self.type_cmb = QComboBox()
 
@@ -34,7 +34,7 @@ class BasicInfo(QWidget):
 
         id_type_lay = QHBoxLayout()
         id_type_lay.setContentsMargins(0, 0, 0, 0)
-        id_type_lay.addWidget(self.guest_id)
+        id_type_lay.addWidget(self.guest_id_le)
         id_type_lay.addStretch()
         id_type_lay.addWidget(self.type_cmb)
 
