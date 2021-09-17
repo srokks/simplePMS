@@ -11,7 +11,6 @@ class Connection:
         #TODO: fix path to project/program - use relative paths
         app_path ='/Users/srokks/PycharmProjects/simplePMS'
         db_path = app_path + '/db/test_db.db'
-        print(app_path)
         db = QSqlDatabase('QSQLITE')
         db.setDatabaseName(db_path)
         self.db = None
