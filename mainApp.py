@@ -21,17 +21,17 @@ from PyQt5.QtWidgets import (
 
 
 
-from guest.editGuestWindow import editGuest
+from guest.EditGuestWidget import editGuest
 from room_rack.RoomRack import room_rack
-from guest.searchGuestWindow import SearchGuest
+from guest.SearchGuestWidget import SearchGuest
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        search_btn = QPushButton('guest/searchGuestWindow.py')
+        search_btn = QPushButton('guest/SearchGuestWidget.py')
         search_btn.clicked.connect(self.showSearchGuest)
 
-        new_btn = QPushButton('guest/editGuestWindow.py')
+        new_btn = QPushButton('guest/EditGuestWidget.py')
         new_btn.clicked.connect(self.showEditGuest)
 
         room_rack_btn = QPushButton('room_rack')

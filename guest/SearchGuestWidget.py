@@ -23,7 +23,7 @@ QTableView,
 
 
 from guest.Guest import Guest
-from guest.editGuestWindow import editGuest
+from guest.EditGuestWidget import editGuest
 from db.Connection import Connection
 class QHBoxLayout(QHBoxLayout):
     def __init__(self):
