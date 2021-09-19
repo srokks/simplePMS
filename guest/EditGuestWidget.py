@@ -23,12 +23,7 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtCore import Qt, QRegExp
-app_path= QDir().absolutePath().split('/')
-app_path = '/'.join(app_path[0:-1])
-db_path= app_path+'/db/test_db.db'
-db = QSqlDatabase('QSQLITE')
-db.setDatabaseName(db_path)
-db.open()
+from db.Connection import Connection
 
 from guest.Guest import Guest
 
@@ -59,7 +54,7 @@ class editGuest(QWidget):
     def __init__(self, guest=None):
         super().__init__()
         main_layout = QHBoxLayout()
-
+        self.setMinimumSize(350,600)
         tab = QTabWidget()
 
         main_layout.addWidget(tab)
@@ -74,6 +69,7 @@ class editGuest(QWidget):
         main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
         self.init_guest(guest)
+        # self.resize(200,400)
     def init_guest(self,guest):
         if guest==None:
             pass
@@ -93,12 +89,12 @@ class editGuest(QWidget):
 
     def new_btn_on_click(self):
         # gather info -> prepare querry - > execute querry -> init window with guest
-
+        self.db = Connection().db
         self.gather_data()
         self.prepare_querry()
         pass
     def add_guest(self):
-        querry = QSqlQuery(db=db)
+        querry = QSqlQuery(db=self.db)
         querry.prepare(
             "INSERT INTO "
             "tblGuest(gGuestType,gGender,gFirstName,gLastName,gPhoneNumber,gMailAddress,gIDNumber,gAddressID) "
@@ -122,7 +118,7 @@ class editGuest(QWidget):
             print('error ', querry.lastError().text())
             return False, querry.lastError().text()
     def add_address(self):
-        querry = QSqlQuery(db=db)
+        querry = QSqlQuery(db=self.db)
         querry.prepare(
             "INSERT INTO tblAddresses(aAddress,aAddress2,aCity,aState,aZipCode,aCountry) "
             "VALUES (:address,:address2,:city,:state,:zip_code,:country)"
@@ -192,7 +188,5 @@ if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)
     MainWindow = editGuest()
-    MainWindow.move(0, 0)
-    MainWindow.resize(200, 400)
     MainWindow.show()
     sys.exit(app.exec_())

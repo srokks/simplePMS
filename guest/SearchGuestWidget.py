@@ -1,4 +1,5 @@
 from PyQt5.QtSql import QSqlDatabase,QSqlTableModel,QSqlRelationalTableModel,QSqlQueryModel,QSqlQuery
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (
     QDialog,
@@ -31,9 +32,10 @@ class QHBoxLayout(QHBoxLayout):
         self.setSpacing(1)
 
 class SearchGuest(QWidget):
-
+    clicked_widget = pyqtSignal(bool)
     def __init__(self):
         super(SearchGuest, self).__init__()
+        self.setMinimumSize(500,500)
         self.db = Connection().db
         main_layout = QVBoxLayout()
         search_lines_layout  = QHBoxLayout()
@@ -96,7 +98,8 @@ class SearchGuest(QWidget):
         self.dialog = editGuest(temp_guest)
         self.dialog.show()
 
-
+    def mousePressEvent(self, e):
+        self.clicked_widget.emit(True)
 
     def update_querry(self):
         last_name = self.last_name_search.text()
