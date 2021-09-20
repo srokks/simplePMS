@@ -43,12 +43,15 @@ class ActionButtonsLayout(QVBoxLayout):
         self.update_btn.setDisabled(True)
         self.addWidget(self.update_btn)
         self.close_btn = QPushButton("Close")
-        self.close_btn.clicked.connect(self.close_btn_signal.emit)
+        self.close_btn.clicked.connect(self.close_btn_on_click)
         self.addWidget(self.close_btn)
         self.addStretch()
 
-
-
+    def close_btn_on_click(self):
+        if self.parent().parent().parent():
+            self.parent().parent().parent().close()
+        else:
+            self.parent().parent().close()
 
 class editGuest(QWidget):
     def __init__(self, guest=None):
@@ -64,12 +67,14 @@ class editGuest(QWidget):
         tab.addTab(QWidget(), 'Family Members')
         self.basic_info.obligatories_checked.connect(self.on_obligatories_checked)
         self.action_btn_layout = ActionButtonsLayout()
-        self.action_btn_layout.close_btn_signal.connect(self.close)
+
         self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
         main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
         self.init_guest(guest)
         # self.resize(200,400)
+
+
     def init_guest(self,guest):
         if guest==None:
             pass
