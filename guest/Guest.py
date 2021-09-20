@@ -109,5 +109,33 @@ class Guest(Address):
             return False, querry.lastError().text()
 
     def update_guest(self,db):
-        pass
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "UPDATE tblGuest "
+            "SET "
+            "gGuestType= :guest_type,"
+            "gGender = :gender,"
+            "gFirstName = :first_name,"
+            "gLastName = :last_name,"
+            "gPhoneNumber = :phone_number,"
+            "gMailAddress = :mail_address,"
+            "gIDNumber = :id_number "
+            "WHERE gGuestID = :guest_id"
 
+        )
+        querry.bindValue(":guest_type", str(self.type))
+        querry.bindValue(':gender', self.gender)
+        querry.bindValue(':first_name', self.first_name)
+        querry.bindValue(':last_name', self.last_name)
+        querry.bindValue(':phone_number', self.phone_number)
+        querry.bindValue(':mail_address', self.mail_address)
+        querry.bindValue(':id_number', self.id_number)
+
+        querry.bindValue(':guest_id', str(self.guest_id))
+
+        print(querry.lastQuery())
+        if querry.exec_():
+            return True
+        else:
+            print('error ', querry.lastError().text())
+            return False, querry.lastError().text()

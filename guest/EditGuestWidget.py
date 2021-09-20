@@ -99,23 +99,28 @@ class editGuest(QWidget):
             self.action_btn_layout.update_btn.setDisabled(False)
 
     def update_btn_on_click(self):
-        pass
+        # TODO: connection from main app
+        db = Connection().db
+        guest = self.gather_data()
+        if guest.update_guest(db):
+            self.showdialog('updated')
+
     def new_btn_on_click(self):
         # gather info -> prepare querry - > execute querry -> init window with guest
         #TODO: connection from main app
         db = Connection().db
         new_guest = self.gather_data()
         if new_guest.insert_guest(db):
-            self.showdialog()
+            self.showdialog('added')
         self.init_guest(new_guest)
 
 
-    def showdialog(self):
+    def showdialog(self,str):
         #Todo: - prettyfy dialog :D
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
 
-        msg.setText("Guest addded")
+        msg.setText(f"Guest {str}")
         msg.setWindowTitle("MessageBox demo")
 
         msg.setStandardButtons(QMessageBox.Ok)
@@ -126,6 +131,7 @@ class editGuest(QWidget):
 
     def gather_data(self):
         new_guest = Guest()
+        new_guest.guest_id = None if self.basic_info.guest_id_le.text() == '' else self.basic_info.guest_id_le.text()
         new_guest.type = self.basic_info.type_cmb.currentIndex()
         new_guest.gender = self.basic_info.gender_cmb.currentIndex()
         new_guest.first_name = self.basic_info.first_name_le.text()
@@ -151,7 +157,7 @@ if __name__ == "__main__":
     import sys
     a = Guest()
     db = Connection().db
-    a.fetch_by_id(db,500)
+    a.fetch_by_id(db,501)
     app = QApplication(sys.argv)
     MainWindow = editGuest(a)
     MainWindow.show()
