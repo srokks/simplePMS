@@ -8,7 +8,7 @@
 ## Usage
 
 ```sh
-Just run mainApp.py
+python3 ./mainApp.py
 ```
 
 ## Author

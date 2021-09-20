@@ -99,8 +99,9 @@ class editGuest(QWidget):
         # gather info -> prepare querry - > execute querry -> init window with guest
         #TODO: connection from main app
         db = Connection().db
-        self.gather_data()
-        self.prepare_querry(db)
+        new_guest = self.gather_data()
+        new_guest.insert_guest(db)
+        self.init_guest(new_guest)
         pass
 
     def prepare_querry(self):
@@ -126,23 +127,23 @@ class editGuest(QWidget):
         self.basic_info.country_le.setText("Polska")
 
     def gather_data(self):
-        self.new_guest = Guest()
-        self.new_guest.type = self.basic_info.type_cmb.currentIndex()
-        self.new_guest.gender = self.basic_info.gender_cmb.currentIndex()
-        self.new_guest.first_name = self.basic_info.first_name_le.text()
-        self.new_guest.last_name = self.basic_info.last_name_le.text()
-        self.new_guest.phone_number = self.basic_info.phone_number_le.text()
-        self.new_guest.mail_address = self.basic_info.mail_address_le.text()
+        new_guest = Guest()
+        new_guest.type = self.basic_info.type_cmb.currentIndex()
+        new_guest.gender = self.basic_info.gender_cmb.currentIndex()
+        new_guest.first_name = self.basic_info.first_name_le.text()
+        new_guest.last_name = self.basic_info.last_name_le.text()
+        new_guest.phone_number = self.basic_info.phone_number_le.text()
+        new_guest.mail_address = self.basic_info.mail_address_le.text()
         #TODO:address logic
-        self.new_guest.address_id = None
-        self.new_guest.address = self.basic_info.address_le.text()
-        self.new_guest.address2 = self.basic_info.address2_le.text()
-        self.new_guest.city = self.basic_info.city_le.text()
-        self.new_guest.state = self.basic_info.state_le.text()
-        self.new_guest.zip_code = self.basic_info.zip_code_le.text()
-        self.new_guest.country = self.basic_info.country_le.text()
-        self.new_guest.id_number = self.basic_info.id_number_le.text()
-
+        new_guest.address_id = None
+        new_guest.address = self.basic_info.address_le.text()
+        new_guest.address2 = self.basic_info.address2_le.text()
+        new_guest.city = self.basic_info.city_le.text()
+        new_guest.state = self.basic_info.state_le.text()
+        new_guest.zip_code = self.basic_info.zip_code_le.text()
+        new_guest.country = self.basic_info.country_le.text()
+        new_guest.id_number = self.basic_info.id_number_le.text()
+        return new_guest
     def on_obligatories_checked(self,e):
         if e:
             self.action_btn_layout.new_btn.setDisabled(False)
@@ -151,7 +152,8 @@ class editGuest(QWidget):
 if __name__ == "__main__":
     import sys
     a = Guest()
-    a.fetch_by_id(500)
+    db = Connection().db
+    a.fetch_by_id(db,500)
     app = QApplication(sys.argv)
     MainWindow = editGuest(a)
     MainWindow.show()
