@@ -102,7 +102,7 @@ class editGuest(QWidget):
         # TODO: connection from main app
         db = Connection().db
         guest = self.gather_data()
-        if guest.update_address(db):
+        if guest.update_guest(db):
             self.showdialog('updated')
 
     def new_btn_on_click(self):
