@@ -71,6 +71,7 @@ class editGuest(QWidget):
         self.action_btn_layout = ActionButtonsLayout()
 
         self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
+        self.action_btn_layout.update_btn.clicked.connect(self.update_btn_on_click)
         main_layout.addLayout(self.action_btn_layout)
         self.setLayout(main_layout)
         self.init_guest(guest)
@@ -94,37 +95,34 @@ class editGuest(QWidget):
             self.basic_info.zip_code_le.setText(guest.zip_code)
             self.basic_info.country_le.setText(guest.country)
             self.basic_info.id_number_le.setText(guest.id_number)
+        if guest.guest_id!=None:
+            self.action_btn_layout.update_btn.setDisabled(False)
 
+    def update_btn_on_click(self):
+        pass
     def new_btn_on_click(self):
         # gather info -> prepare querry - > execute querry -> init window with guest
         #TODO: connection from main app
         db = Connection().db
         new_guest = self.gather_data()
-        new_guest.insert_guest(db)
+        if new_guest.insert_guest(db):
+            self.showdialog()
         self.init_guest(new_guest)
-        pass
 
-    def prepare_querry(self):
-        if self.new_guest.address != '' or self.new_guest.address2 != '' or self.new_guest.city != '' or self.new_guest.state != '' or self.new_guest.zip_code != '' or self.new_guest.country != '':
-            if self.add_address() or self.add_guest():
-                print('guest + address added')
-        else:
-            if self.add_guest():
-                print('guest added')
 
-    def set_fake_data(self):
-        self.basic_info.first_name_le.setText("Jarosław")
-        self.basic_info.last_name_le.setText("Sroka")
-        self.basic_info.phone_number_le.setText("123-432-123")
-        self.basic_info.mail_address_le.setText("sroka@sroka.pl")
-        self.basic_info.id_number_le.setText("AWG123432")
+    def showdialog(self):
+        #Todo: - prettyfy dialog :D
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
 
-        self.basic_info.address_le.setText("Bitwy Warszawskiej")
-        self.basic_info.address2_le.setText("12/12")
-        self.basic_info.city_le.setText("Warszawa")
-        self.basic_info.state_le.setText("mazowieckie")
-        self.basic_info.zip_code_le.setText("02-366")
-        self.basic_info.country_le.setText("Polska")
+        msg.setText("Guest addded")
+        msg.setWindowTitle("MessageBox demo")
+
+        msg.setStandardButtons(QMessageBox.Ok)
+
+
+        retval = msg.exec_()
+
 
     def gather_data(self):
         new_guest = Guest()
@@ -134,7 +132,7 @@ class editGuest(QWidget):
         new_guest.last_name = self.basic_info.last_name_le.text()
         new_guest.phone_number = self.basic_info.phone_number_le.text()
         new_guest.mail_address = self.basic_info.mail_address_le.text()
-        #TODO:address logic
+
         new_guest.address_id = None
         new_guest.address = self.basic_info.address_le.text()
         new_guest.address2 = self.basic_info.address2_le.text()
@@ -155,6 +153,6 @@ if __name__ == "__main__":
     db = Connection().db
     a.fetch_by_id(db,500)
     app = QApplication(sys.argv)
-    MainWindow = editGuest()
+    MainWindow = editGuest(a)
     MainWindow.show()
     sys.exit(app.exec_())

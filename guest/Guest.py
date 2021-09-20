@@ -84,6 +84,7 @@ class Guest(Address):
                 pass
             else:
                 print("*ERROR*")
+        print('*inserting guest**')
         querry = QSqlQuery(db=db)
         querry.prepare(
             "INSERT INTO "
@@ -107,4 +108,6 @@ class Guest(Address):
             print('error ', querry.lastError().text())
             return False, querry.lastError().text()
 
+    def update_guest(self,db):
+        pass
 
