@@ -77,6 +77,9 @@ class Guest(Address):
         self.zip_code = model.index(0,15).data()
         self.country = model.index(0,16).data()
 
+        query.bindValue(':guest_id', id)
+        query.exec_()
+
     def insert_guest(self,db):
         if self.address or self.address2 or self.city or self.state or self.zip_code or self.country != '' :
             'if any of addres text values are filled add address'
@@ -107,8 +110,22 @@ class Guest(Address):
         else:
             print('error ', querry.lastError().text())
             return False, querry.lastError().text()
+    def get_address_id_by_guest_id(self,db,guest_id:int):
+        'returns address_id from db based on guest_id'
+        model = QSqlQueryModel()
+        query = QSqlQuery(db=db)
+        query.prepare(
+            "SELECT gAddressID FROM tblGuest "
+            "WHERE "
+            "gGuestID = :guest_id "
 
+        )
+        query.bindValue(':guest_id', guest_id)
+        query.exec_()
+        model.setQuery(query)
+        return model.index(0,0).data()
     def update_guest(self,db):
+
         querry = QSqlQuery(db=db)
         querry.prepare(
             "UPDATE tblGuest "
@@ -133,7 +150,36 @@ class Guest(Address):
 
         querry.bindValue(':guest_id', str(self.guest_id))
 
-        print(querry.lastQuery())
+        if self.update_address(db) and querry.exec_():
+            return True
+        else:
+            print('error ', querry.lastError().text())
+            return False, querry.lastError().text()
+
+    def update_address(self,db):
+        self.address_id = self.get_address_id_by_guest_id(db,self.guest_id)
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "UPDATE tblAddresses "
+            "SET "
+            "aAddress = :address,"
+            "aAddress2 = :address2,"
+            "aCity = :city,"
+            "aState = :state,"
+            "aZipCode = :zip_code,"
+            "aCountry = :country "
+            "WHERE aAddressID = :address_id"
+
+        )
+        querry.bindValue(":address", self.address)
+        querry.bindValue(":address2", self.address2)
+        querry.bindValue(":city", self.city)
+        querry.bindValue(":state", self.state)
+        querry.bindValue(":zip_code", self.zip_code)
+        querry.bindValue(":country", self.country)
+        querry.bindValue(":address_id", str(self.address_id))
+
+
         if querry.exec_():
             return True
         else:

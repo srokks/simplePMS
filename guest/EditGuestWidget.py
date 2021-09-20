@@ -95,14 +95,14 @@ class editGuest(QWidget):
             self.basic_info.zip_code_le.setText(guest.zip_code)
             self.basic_info.country_le.setText(guest.country)
             self.basic_info.id_number_le.setText(guest.id_number)
-        if guest.guest_id!=None:
-            self.action_btn_layout.update_btn.setDisabled(False)
+            if guest.guest_id!=None:
+                self.action_btn_layout.update_btn.setDisabled(False)
 
     def update_btn_on_click(self):
         # TODO: connection from main app
         db = Connection().db
         guest = self.gather_data()
-        if guest.update_guest(db):
+        if guest.update_address(db):
             self.showdialog('updated')
 
     def new_btn_on_click(self):
@@ -139,7 +139,7 @@ class editGuest(QWidget):
         new_guest.phone_number = self.basic_info.phone_number_le.text()
         new_guest.mail_address = self.basic_info.mail_address_le.text()
 
-        new_guest.address_id = None
+        # new_guest.address_id = None
         new_guest.address = self.basic_info.address_le.text()
         new_guest.address2 = self.basic_info.address2_le.text()
         new_guest.city = self.basic_info.city_le.text()

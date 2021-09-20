@@ -93,8 +93,9 @@ class SearchGuest(QWidget):
         self.setLayout(main_layout)
 
     def table_on_dclick(self,e):
+        db = Connection().db
         temp_guest = Guest()
-        temp_guest.fetch_by_id(self.model.index(e.row(),0).data())
+        temp_guest.fetch_by_id(db,self.model.index(e.row(),0).data())
         self.dialog = editGuest(temp_guest)
         self.dialog.show()
 
