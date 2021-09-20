@@ -37,6 +37,8 @@ class ActionBtnLayout(QWidget):
         lay.addWidget(self.search_guest_btn)
         self.edit_guest_btn = QPushButton('/guest/EditGuestWidget')
         lay.addWidget(self.edit_guest_btn)
+        self.room_rack_btn = QPushButton('/room_rack/RoomRack.py')
+        lay.addWidget(self.room_rack_btn)
         self.setLayout(lay)
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -54,12 +56,20 @@ class MainWindow(QMainWindow):
 
         action_btn.edit_guest_btn.clicked.connect(self.edit_guest_show)
         action_btn.search_guest_btn.clicked.connect(self.show_guest_show)
+        action_btn.room_rack_btn.clicked.connect(self.room_rack_show)
 
 
 
 
 
         self.setCentralWidget(main_wi)
+
+    def room_rack_show(self):
+        sub = QMdiSubWindow()
+        sub.setWidget(room_rack())
+        self.mdi_area.addSubWindow(sub)
+        sub.show()
+
     def edit_guest_show(self):
         sub = QMdiSubWindow()
         sub.setWidget(editGuest())
@@ -70,7 +80,7 @@ class MainWindow(QMainWindow):
     def show_guest_show(self):
         sub = QMdiSubWindow()
         sub.setWidget(SearchGuest())
-        sub.setWindowTitle("Edit")
+        sub.setWindowTitle("Search")
         self.mdi_area.addSubWindow(sub)
         sub.show()
 
