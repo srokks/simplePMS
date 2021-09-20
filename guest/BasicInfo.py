@@ -12,6 +12,7 @@ from guest.LineEdit import LineEdit
 
 
 class BasicInfo(QWidget):
+    'Widget for basic guest info'
     obligatories_checked = pyqtSignal(bool)
 
     def __init__(self):
@@ -73,6 +74,7 @@ class BasicInfo(QWidget):
         self.type_cmb.currentIndexChanged.connect(self.type_cmb_on_change)
 
     def set_obligatories(self, list):
+        "sets obligatory prop for items added to obligatory list"
         for el in list:
             el.setObligatory(True)
             el.textChanged.connect(self.check_obligatories)
@@ -93,7 +95,8 @@ class BasicInfo(QWidget):
 
     def check_obligatories(self, e):
         """Checks if all items (LineEdits) witch are in obligatory_list are with text
-        Except two last (phone no and mail) them are checked """
+        Except two last (phone no and mail) them are checked
+        In case of new obligatory fields need to insert on 0 index in obligatory_list"""
         flag = False
         for el in self.obligatories_list[:-2]:
             if el.text() != '':

@@ -30,7 +30,6 @@ from guest.Guest import Guest
 
 from guest.BasicInfo import BasicInfo
 class ActionButtonsLayout(QVBoxLayout):
-    close_btn_signal = pyqtSignal()
     def __init__(self):
 
         super(ActionButtonsLayout, self).__init__()
@@ -57,15 +56,18 @@ class editGuest(QWidget):
     def __init__(self, guest=None):
         super().__init__()
         main_layout = QHBoxLayout()
-        self.setMinimumSize(350,600)
+        self.setMinimumSize(300,600)
         tab = QTabWidget()
-
+        tab.setMinimumWidth(200)
         main_layout.addWidget(tab)
         self.basic_info = BasicInfo()
-        self.basic_info.first_name_le.text()
+
         tab.addTab(self.basic_info, 'Basic')
+
         tab.addTab(QWidget(), 'Family Members')
+
         self.basic_info.obligatories_checked.connect(self.on_obligatories_checked)
+
         self.action_btn_layout = ActionButtonsLayout()
 
         self.action_btn_layout.new_btn.clicked.connect(self.new_btn_on_click)
@@ -76,6 +78,7 @@ class editGuest(QWidget):
 
 
     def init_guest(self,guest):
+        'in case of passed guest from parent widget fuction sets text in line edits'
         if guest==None:
             pass
         else:
@@ -94,55 +97,11 @@ class editGuest(QWidget):
 
     def new_btn_on_click(self):
         # gather info -> prepare querry - > execute querry -> init window with guest
-        self.db = Connection().db
+        #TODO: connection from main app
+        db = Connection().db
         self.gather_data()
-        self.prepare_querry()
+        self.prepare_querry(db)
         pass
-    def add_guest(self):
-        querry = QSqlQuery(db=self.db)
-        querry.prepare(
-            "INSERT INTO "
-            "tblGuest(gGuestType,gGender,gFirstName,gLastName,gPhoneNumber,gMailAddress,gIDNumber,gAddressID) "
-            "VALUES (:guest_type,:gender,:first_name,:last_name,:phone_number,:mail_address,:id_number,:address_id)"
-
-        )
-        querry.bindValue(":guest_type", self.new_guest.type)
-        querry.bindValue(':gender', self.new_guest.gender)
-        querry.bindValue(':first_name', self.new_guest.first_name)
-        querry.bindValue(':last_name', self.new_guest.last_name)
-        querry.bindValue(':phone_number', self.new_guest.phone_number)
-        querry.bindValue(':mail_address', self.new_guest.mail_address)
-        querry.bindValue(':id_number', self.new_guest.id_number)
-        querry.bindValue(':address_id', self.new_guest.address_id)
-
-        if querry.exec_():
-            print("addres added")
-            self.new_guest.address_id = querry.lastInsertId()
-            return True
-        else:
-            print('error ', querry.lastError().text())
-            return False, querry.lastError().text()
-    def add_address(self):
-        querry = QSqlQuery(db=self.db)
-        querry.prepare(
-            "INSERT INTO tblAddresses(aAddress,aAddress2,aCity,aState,aZipCode,aCountry) "
-            "VALUES (:address,:address2,:city,:state,:zip_code,:country)"
-
-        )
-        querry.bindValue(":address",self.new_guest.address)
-        querry.bindValue(":address2",self.new_guest.address2)
-        querry.bindValue(":city",self.new_guest.city)
-        querry.bindValue(":state",self.new_guest.state)
-        querry.bindValue(":zip_code",self.new_guest.zip_code)
-        querry.bindValue(":country",self.new_guest.country)
-        if querry.exec_():
-            print("addres added")
-            self.new_guest.address_id = querry.lastInsertId()
-            return True
-        else:
-            print('error ',querry.lastError().text())
-            return False,querry.lastError().text()
-
 
     def prepare_querry(self):
         if self.new_guest.address != '' or self.new_guest.address2 != '' or self.new_guest.city != '' or self.new_guest.state != '' or self.new_guest.zip_code != '' or self.new_guest.country != '':
@@ -191,7 +150,9 @@ class editGuest(QWidget):
             self.action_btn_layout.new_btn.setDisabled(True)
 if __name__ == "__main__":
     import sys
+    a = Guest()
+    a.fetch_by_id(500)
     app = QApplication(sys.argv)
-    MainWindow = editGuest()
+    MainWindow = editGuest(a)
     MainWindow.show()
     sys.exit(app.exec_())
