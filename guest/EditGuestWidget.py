@@ -155,6 +155,6 @@ if __name__ == "__main__":
     db = Connection().db
     a.fetch_by_id(db,500)
     app = QApplication(sys.argv)
-    MainWindow = editGuest(a)
+    MainWindow = editGuest()
     MainWindow.show()
     sys.exit(app.exec_())

@@ -10,6 +10,7 @@ class Address:
         self.zip_code = None
         self.country = None
     def insert_address(self,db):
+        print('***insertin address***')
         querry = QSqlQuery(db=db)
         querry.prepare(
             "INSERT INTO tblAddresses(aAddress,aAddress2,aCity,aState,aZipCode,aCountry) "
@@ -77,31 +78,33 @@ class Guest(Address):
         self.country = model.index(0,16).data()
 
     def insert_guest(self,db):
-        if self.insert_address(db):
-            querry = QSqlQuery(db=db)
-            querry.prepare(
-                "INSERT INTO "
-                "tblGuest(gGuestType,gGender,gFirstName,gLastName,gPhoneNumber,gMailAddress,gIDNumber,gAddressID) "
-                "VALUES (:guest_type,:gender,:first_name,:last_name,:phone_number,:mail_address,:id_number,:address_id)"
-
-            )
-            querry.bindValue(":guest_type", self.type)
-            querry.bindValue(':gender', self.gender)
-            querry.bindValue(':first_name', self.first_name)
-            querry.bindValue(':last_name', self.last_name)
-            querry.bindValue(':phone_number', self.phone_number)
-            querry.bindValue(':mail_address', self.mail_address)
-            querry.bindValue(':id_number', self.id_number)
-            querry.bindValue(':address_id', self.address_id)
-
-            if querry.exec_():
-                print("guest  added")
-                self.guest_id = querry.lastInsertId()
-                return True
+        if self.address or self.address2 or self.city or self.state or self.zip_code or self.country != '' :
+            'if any of addres text values are filled add address'
+            if self.insert_address(db):
+                pass
             else:
-                print('error ', querry.lastError().text())
-                return False, querry.lastError().text()
+                print("*ERROR*")
+        querry = QSqlQuery(db=db)
+        querry.prepare(
+            "INSERT INTO "
+            "tblGuest(gGuestType,gGender,gFirstName,gLastName,gPhoneNumber,gMailAddress,gIDNumber,gAddressID) "
+            "VALUES (:guest_type,:gender,:first_name,:last_name,:phone_number,:mail_address,:id_number,:address_id)"
 
+        )
+        querry.bindValue(":guest_type", self.type)
+        querry.bindValue(':gender', self.gender)
+        querry.bindValue(':first_name', self.first_name)
+        querry.bindValue(':last_name', self.last_name)
+        querry.bindValue(':phone_number', self.phone_number)
+        querry.bindValue(':mail_address', self.mail_address)
+        querry.bindValue(':id_number', self.id_number)
+        querry.bindValue(':address_id', self.address_id)
 
+        if querry.exec_():
+            self.guest_id = querry.lastInsertId()
+            return True
+        else:
+            print('error ', querry.lastError().text())
+            return False, querry.lastError().text()
 
 
