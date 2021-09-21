@@ -81,12 +81,12 @@ class Guest(Address):
         query.exec_()
 
     def insert_guest(self,db):
-        if self.address or self.address2 or self.city or self.state or self.zip_code or self.country != '' :
-            'if any of addres text values are filled add address'
-            if self.insert_address(db):
-                pass
-            else:
-                print("*ERROR*")
+
+        if self.insert_address(db):
+            pass
+        else:
+            print("*ERROR*")
+
         print('*inserting guest**')
         querry = QSqlQuery(db=db)
         querry.prepare(
@@ -185,3 +185,5 @@ class Guest(Address):
         else:
             print('error ', querry.lastError().text())
             return False, querry.lastError().text()
+
+
