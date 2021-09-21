@@ -31,43 +31,41 @@ class QHBoxLayout(QHBoxLayout):
         super(QHBoxLayout, self).__init__()
         self.setSpacing(1)
 
+class SearchLineLayout(QHBoxLayout):
+    update_querry = pyqtSignal()
+    def __init__(self):
+
+        super(SearchLineLayout, self).__init__()
+
+        self.last_name_search = QLineEdit()
+        self.last_name_search.setPlaceholderText('Last name')
+        self.last_name_search.textChanged.connect(self.update_querry.emit)
+
+        self.first_name_search = QLineEdit()
+        self.first_name_search.setPlaceholderText('First name')
+        self.first_name_search.textChanged.connect(self.update_querry.emit)
+
+        self.city_search = QLineEdit()
+        self.city_search.setPlaceholderText('City')
+        self.city_search.textChanged.connect(self.update_querry.emit)
+
+        self.addWidget(self.last_name_search)
+        self.addWidget(self.first_name_search)
+        self.addWidget(self.city_search)
+
+
 class SearchGuest(QWidget):
     clicked_widget = pyqtSignal(bool)
     def __init__(self):
         super(SearchGuest, self).__init__()
         self.setMinimumSize(500,500)
+
         self.db = Connection().db
+
         main_layout = QVBoxLayout()
-        search_lines_layout  = QHBoxLayout()
-        self.last_name_search = QLineEdit()
-        self.last_name_search.setPlaceholderText('Last name')
-        self.last_name_search.textChanged.connect(self.update_querry)
-        self.first_name_search = QLineEdit()
-        self.first_name_search.setPlaceholderText('First name')
-        self.first_name_search.textChanged.connect(self.update_querry)
-        self.city_search = QLineEdit()
-        self.city_search.setPlaceholderText('City')
-        self.city_search.textChanged.connect(self.update_querry)
 
-        search_lines_layout.addWidget(self.last_name_search)
-        search_lines_layout.addWidget(self.first_name_search)
-        search_lines_layout.addWidget(self.city_search)
-
-        search_action_layout = QHBoxLayout()
-
-        self.search_btn = QPushButton("Search")
-        self.search_btn.clicked.connect(self.search_on_click)
-        self.choose_btn = QPushButton("Choose")
-        self.close_btn = QPushButton("Close")
-        self.close_btn.clicked.connect(self.close)
-
-        search_action_layout.addWidget(self.search_btn)
-        search_action_layout.addWidget(self.choose_btn)
-        search_action_layout.addWidget(self.close_btn)
-        search_layout = QHBoxLayout()
-        search_layout.addLayout(search_lines_layout)
-        search_layout.addLayout(search_action_layout)
-
+        self.search_line_layout = SearchLineLayout()
+        self.search_line_layout.update_querry.connect(self.update_querry)
         self.guest_table = QTableView()
         self.guest_table.setEditTriggers(self.guest_table.NoEditTriggers)
         self.guest_table.setSelectionBehavior(self.guest_table.SelectRows)
@@ -79,7 +77,7 @@ class SearchGuest(QWidget):
         self.query = QSqlQuery(db=self.db)
         self.query.prepare(
             "SELECT gGuestID,gFirstName,gLastName ,aCity,gPhoneNumber,gMailAddress FROM tblGuest "
-            "INNER JOIN tblAddresses ON tblGuest.gAddressID = tblAddresses.aAddressID "
+            "LEFT OUTER JOIN tblAddresses ON tblGuest.gAddressID = tblAddresses.aAddressID "
             "WHERE "
             "gLastName LIKE '%' || :last_name || '%' AND "
             "gFirstName LIKE '%' || :first_name || '%' AND "
@@ -88,24 +86,24 @@ class SearchGuest(QWidget):
 
         )
         self.update_querry()
-        main_layout.addLayout(search_layout)
+        main_layout.addLayout(self.search_line_layout)
         main_layout.addWidget(self.guest_table)
         self.setLayout(main_layout)
 
     def table_on_dclick(self,e):
-        db = Connection().db
+
         temp_guest = Guest()
-        temp_guest.fetch_by_id(db,self.model.index(e.row(),0).data())
-        self.dialog = editGuest(temp_guest)
+        temp_guest.fetch_by_id(self.db,self.model.index(e.row(),0).data())
+        self.dialog = editGuest(db=self.db,guest=temp_guest)
         self.dialog.show()
 
     def mousePressEvent(self, e):
         self.clicked_widget.emit(True)
 
     def update_querry(self):
-        last_name = self.last_name_search.text()
-        first_name = self.first_name_search.text()
-        city = self.city_search.text()
+        last_name = self.search_line_layout.last_name_search.text()
+        first_name = self.search_line_layout.first_name_search.text()
+        city = self.search_line_layout.city_search.text()
         self.query.bindValue(':last_name',last_name)
         self.query.bindValue(':first_name',first_name)
         self.query.bindValue(':city',city)
