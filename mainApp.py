@@ -1,32 +1,17 @@
 from PyQt5.QtWidgets import (
-    QDialog,
     QWidget,
     QMainWindow,
     QApplication,
     QHBoxLayout,
     QVBoxLayout,
-    QFormLayout,
-    QTabWidget,
-    QLineEdit,
     QPushButton,
-    QBoxLayout,
-    QTableWidget,
-    QTableWidgetItem,
-    QComboBox,
-    QLabel,
-    QMessageBox,
-QDockWidget,
-QMdiArea,QMdiSubWindow
+    QMdiArea, QMdiSubWindow
 )
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QFont, QPainterPath, QPixmap, QDrag
-from PyQt5.QtCore import QAbstractTableModel, QEvent, Qt, QRect, QMimeData, pyqtSignal
-
 
 from guest.EditGuestWidget import editGuest
-from room_rack.RoomRack import room_rack
 from guest.SearchGuestWidget import SearchGuest
-
+from room_rack.RoomRack import room_rack
+from reservation.ResEdit import ReservationEdit
 
 class ActionBtnLayout(QWidget):
     def __init__(self):
@@ -39,6 +24,8 @@ class ActionBtnLayout(QWidget):
         lay.addWidget(self.edit_guest_btn)
         self.room_rack_btn = QPushButton('/room_rack/RoomRack.py')
         lay.addWidget(self.room_rack_btn)
+        self.res_edit_btn = QPushButton('/reservation/ResEdit.py')
+        lay.addWidget(self.res_edit_btn)
         self.setLayout(lay)
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -57,6 +44,7 @@ class MainWindow(QMainWindow):
         action_btn.edit_guest_btn.clicked.connect(self.edit_guest_show)
         action_btn.search_guest_btn.clicked.connect(self.show_guest_show)
         action_btn.room_rack_btn.clicked.connect(self.room_rack_show)
+        action_btn.res_edit_btn.clicked.connect(self.res_edit_show)
 
 
 
@@ -64,6 +52,11 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(main_wi)
 
+    def res_edit_show(self):
+        sub = QMdiSubWindow()
+        sub.setWidget(ReservationEdit())
+        self.mdi_area.addSubWindow(sub)
+        sub.show()
     def room_rack_show(self):
         sub = QMdiSubWindow()
         sub.setWidget(room_rack())
@@ -86,7 +79,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     import sys
-    import qdarkstyle
 
     app = QApplication(sys.argv)
 
