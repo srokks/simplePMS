@@ -53,8 +53,12 @@ class ActionButtonsLayout(QVBoxLayout):
             self.parent().parent().close()
 
 class editGuest(QWidget):
-    def __init__(self, guest=None):
+    def __init__(self,db=None, guest=None):
         super().__init__()
+        if db==None:
+            self.db = Connection().db
+        else:
+            self.db = db
         main_layout = QHBoxLayout()
         self.setMinimumSize(300,600)
         tab = QTabWidget()
@@ -100,17 +104,17 @@ class editGuest(QWidget):
 
     def update_btn_on_click(self):
         # TODO: connection from main app
-        db = Connection().db
+
         guest = self.gather_data()
-        if guest.update_guest(db):
+        if guest.update_guest(self.db):
             self.showdialog('updated')
 
     def new_btn_on_click(self):
         # gather info -> prepare querry - > execute querry -> init window with guest
         #TODO: connection from main app
-        db = Connection().db
+
         new_guest = self.gather_data()
-        if new_guest.insert_guest(db):
+        if new_guest.insert_guest(self.db):
             self.showdialog('added')
         self.init_guest(new_guest)
 
