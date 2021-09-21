@@ -1,6 +1,7 @@
 from PyQt5.QtSql import QSqlDatabase,QSqlTableModel,QSqlRelationalTableModel,QSqlQueryModel,QSqlQuery
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtCore import QDir
+from PyQt5.QtCore import QDir,Qt
+from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import (
     QDialog,
     QWidget,
@@ -26,17 +27,15 @@ QTableView,
 from guest.Guest import Guest
 from guest.EditGuestWidget import editGuest
 from db.Connection import Connection
-class QHBoxLayout(QHBoxLayout):
-    def __init__(self):
-        super(QHBoxLayout, self).__init__()
-        self.setSpacing(1)
+
 
 class SearchLineLayout(QHBoxLayout):
     update_querry = pyqtSignal()
+    choose_btn_clicked = pyqtSignal()
     def __init__(self):
 
         super(SearchLineLayout, self).__init__()
-
+        self.setSpacing(1)
         self.last_name_search = QLineEdit()
         self.last_name_search.setPlaceholderText('Last name')
         self.last_name_search.textChanged.connect(self.update_querry.emit)
@@ -49,29 +48,44 @@ class SearchLineLayout(QHBoxLayout):
         self.city_search.setPlaceholderText('City')
         self.city_search.textChanged.connect(self.update_querry.emit)
 
+        self.choose_btn = QPushButton()
+        self.choose_btn.setText('Choose...')
+        self.choose_btn.setDisabled(True)
+        self.choose_btn.clicked.connect(self.choose_btn_clicked.emit)
         self.addWidget(self.last_name_search)
         self.addWidget(self.first_name_search)
         self.addWidget(self.city_search)
-
+        self.addWidget(self.choose_btn)
 
 class SearchGuest(QWidget):
     clicked_widget = pyqtSignal(bool)
-    def __init__(self):
+    def __init__(self,db = None,guest = None):
+        if db == None:
+            self.db = Connection().db
+        else:
+            self.db = db
+        if guest == None:
+            self.guest = Guest()
+        else:
+            self.guest = guest
+
         super(SearchGuest, self).__init__()
         self.setMinimumSize(500,500)
 
-        self.db = Connection().db
+
 
         main_layout = QVBoxLayout()
 
         self.search_line_layout = SearchLineLayout()
         self.search_line_layout.update_querry.connect(self.update_querry)
+        self.search_line_layout.choose_btn.clicked.connect(self.update_querry)
+
         self.guest_table = QTableView()
         self.guest_table.setEditTriggers(self.guest_table.NoEditTriggers)
         self.guest_table.setSelectionBehavior(self.guest_table.SelectRows)
         self.guest_table.doubleClicked.connect(self.table_on_dclick)
         self.guest_table.verticalHeader().hide()
-        self.model = QSqlQueryModel()
+        self.model = QSqlRelationalTableModel()
         self.guest_table.setModel(self.model)
 
         self.query = QSqlQuery(db=self.db)
@@ -97,9 +111,15 @@ class SearchGuest(QWidget):
         self.dialog = editGuest(db=self.db,guest=temp_guest)
         self.dialog.show()
 
-    def mousePressEvent(self, e):
-        self.clicked_widget.emit(True)
 
+    def keyReleaseEvent(self, e : QKeyEvent):
+        if(e.key()==Qt.Key_Escape):
+            self.close_btn_on_click()
+    def close_btn_on_click(self):
+        if self.parent()!=None:
+            self.parentWidget().close()
+        else:
+            self.close()
     def update_querry(self):
         last_name = self.search_line_layout.last_name_search.text()
         first_name = self.search_line_layout.first_name_search.text()
