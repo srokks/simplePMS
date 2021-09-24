@@ -55,21 +55,20 @@ class ReservationActionLayout(QVBoxLayout):
 
 
 class ReservationEdit(QWidget):
-    def __init__(self):
+    def __init__(self,parent=None):
         super(ReservationEdit, self).__init__()
-        self.resize(200,200)
+        self.setMinimumWidth(800)
         main_layout = QGridLayout()
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(5,5,5,5)
-
         res_details = ReservationDetailWidget()
-        res_ordered = ReservationOrderedWidget(self)
+        res_ordered = ReservationOrderedWidget()
         rooms_avel = ReservationAvelRooms()
         action_lay = ReservationActionLayout()
 
         main_layout.addWidget(res_ordered,0,0)
         main_layout.addWidget(rooms_avel,0,1)
-        main_layout.addWidget(res_details,1,0,1,2)
+        main_layout.addWidget(res_details,1,0,1,3)
         main_layout.addLayout(action_lay,0,2,3,1)
         self.setLayout(main_layout)
 class MainWindow(QWidget):
@@ -77,18 +76,18 @@ class MainWindow(QWidget):
         super(MainWindow, self).__init__()
         lay = QVBoxLayout()
         self.mdi_area = QMdiArea()
-        res_edit = ReservationEdit()
+        res_edit = ReservationEdit(self)
 
         self.mdi_area.addSubWindow(res_edit)
-        self.mdi_area.
+
         lay.addWidget(self.mdi_area)
         self.setLayout(lay)
 if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
-    win = MainWindow()
+    win = ReservationEdit()
     win.move(0, 0)
-    win.resize(600, 600)
+    # win.resize(600, 600)
     win.show()
     app.exec_()
