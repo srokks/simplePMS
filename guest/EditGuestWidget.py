@@ -161,8 +161,8 @@ if __name__ == "__main__":
     import sys
     a = Guest()
     db = Connection().db
-    a.fetch_by_id(db,501)
+    a.fetch_by_id(db,666)
     app = QApplication(sys.argv)
-    MainWindow = editGuest(a)
+    MainWindow = editGuest(guest=a)
     MainWindow.show()
     sys.exit(app.exec_())

@@ -57,6 +57,7 @@ class Guest(Address):
         )
         query.bindValue(':guest_id',id)
         query.exec_()
+        print(query.lastError())
         model.setQuery(query)
 
         self.guest_id = model.index(0,0).data()
@@ -77,8 +78,7 @@ class Guest(Address):
         self.zip_code = model.index(0,15).data()
         self.country = model.index(0,16).data()
 
-        query.bindValue(':guest_id', id)
-        query.exec_()
+
 
     def insert_guest(self,db):
 

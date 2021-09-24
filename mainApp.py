@@ -38,7 +38,6 @@ class MainWindow(QMainWindow):
         main_lay.addWidget(action_btn)
 
         self.mdi_area = QMdiArea()
-
         main_lay.addWidget(self.mdi_area)
 
         action_btn.edit_guest_btn.clicked.connect(self.edit_guest_show)
