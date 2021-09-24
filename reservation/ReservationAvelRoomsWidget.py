@@ -34,7 +34,9 @@ from db.Connection import Connection
 class ReservationAvelRooms(QWidget):
     def __init__(self):
         super(ReservationAvelRooms, self).__init__()
-        self.setMinimumSize(200,200)
+        self.setMinimumSize(250,300)
+        self.setMaximumHeight(400)
+        self.setMaximumWidth(600)
         main_layout = QHBoxLayout()
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(0,0,0,0)
