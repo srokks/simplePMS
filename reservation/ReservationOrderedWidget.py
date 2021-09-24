@@ -11,18 +11,25 @@ from PyQt5.QtWidgets import (
 )
 
 from db.Connection import Connection
-
+from guest.Guest import Guest
 
 class ReservationOrderedWidget(QWidget):
     is_completer = False
 
-    def __init__(self, parent=None, db=None):
+    def __init__(self, parent=None, db=None,guest = None):
         if db == None:
             self.db = Connection().db
         else:
             self.db = db
+        self.guest=guest
         super(ReservationOrderedWidget, self).__init__()
+
+
         self.setParent(parent)
+        self.setMinimumHeight(300)
+        self.setMinimumWidth(300)
+        self.setMaximumHeight(400)
+        self.setMaximumWidth(400)
         main_layout = QHBoxLayout()
 
         form_lay = QFormLayout()
@@ -42,71 +49,55 @@ class ReservationOrderedWidget(QWidget):
 
         count_pstcd_cty = QHBoxLayout()
         count_pstcd_cty.setSpacing(1)
-        count_pstcd_cty.addWidget(QLineEdit())
-        count_pstcd_cty.addWidget(QLineEdit())
-        count_pstcd_cty.addWidget(QLineEdit())
+        self.country_le = QLineEdit()
+        self.post_code = QLineEdit()
+        self.city_le=QLineEdit()
+        count_pstcd_cty.addWidget(self.country_le)
+        count_pstcd_cty.addWidget(self.post_code)
+        count_pstcd_cty.addWidget(self.city_le)
 
+
+        self.first_name_le = QLineEdit()
         self.last_name_le = QLineEdit()
-        self.last_name_le.textEdited.connect(self.on_edited)
+        self.street_le = QLineEdit()
+        self.phone_le = QLineEdit()
+        self.mail_address_le = QLineEdit()
 
-        self.completer = QCompleter([])
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self.completer.activated.connect(self.on_activated)
-        self.last_name_le.setCompleter(self.completer)
-        # self.first_name_le.setMinimumWidth(self.width())
+        self.last_stay_le = QLineEdit()
+        self.last_stay_le.setDisabled(True)
         form_lay.setLabelAlignment(Qt.AlignLeft)
         form_lay.addRow('Title/guest type:', gender_type_lay)
         form_lay.addRow('Last name:', self.last_name_le)
-        form_lay.addRow('First name:', QLineEdit())
-        form_lay.addRow('Street:', QLineEdit())
+        form_lay.addRow('First name:', self.first_name_le)
+        form_lay.addRow('Street:', self.street_le)
         form_lay.addRow('Country/Post code/City:', count_pstcd_cty)
-        form_lay.addRow('Phone:', QLineEdit())
-        form_lay.addRow('Email:', QLineEdit())
-        form_lay.addRow('Last stay:', QLineEdit())
+        form_lay.addRow('Phone:', self.phone_le)
+        form_lay.addRow('Email:', self.mail_address_le)
+        form_lay.addRow('Last stay:', self.last_stay_le)
         main_layout.addLayout(form_lay)
         form_lay.setFieldGrowthPolicy(form_lay.ExpandingFieldsGrow)
-        self.set_model()
         self.setLayout(main_layout)
+        self.init_guest(self.guest)
 
-    def set_model(self):
-        self.model = QSqlRelationalTableModel()
+    def init_guest(self, guest):
+        'in case of passed guest from parent widget fuction sets text in line edits'
+        if guest == None:
+            pass
+        else:
+            self.gender_cmb.setCurrentIndex(guest.gender+1)
+            self.guest_type_cmb.setCurrentIndex(guest.type+1)
+            self.first_name_le.setText(guest.first_name)
+            self.last_name_le.setText(guest.last_name)
+            self.phone_le.setText(guest.phone_number)
+            self.mail_address_le.setText(guest.mail_address)
+            self.street_le.setText(guest.address+','+guest.address2)
+            self.city_le.setText(guest.city)
+            self.country_le.setText(guest.country)
+            self.post_code.setText(guest.zip_code)
 
-        self.query = QSqlQuery(db=self.db)
-        self.query.prepare(
-            "SELECT gGuestID,gFirstName,gLastName ,aCity,gPhoneNumber,gMailAddress FROM tblGuest "
-            "INNER JOIN tblAddresses ON tblGuest.gAddressID = tblAddresses.aAddressID "
-            "WHERE "
-            "gLastName LIKE '%' || :last_name || '%' AND "
-            "gFirstName LIKE '%' || :first_name || '%' AND "
-            "aCity LIKE '%' || :city || '%' "
-            "ORDER BY gLastName ASC"
-        )
 
-    def update_querry(self):
-        last_name = self.last_name_le.text()
-        first_name = ''
-        city = ''
-        self.query.bindValue(':last_name', last_name)
-        self.query.bindValue(':first_name', first_name)
-        self.query.bindValue(':city', city)
-        self.query.exec_()
 
-        self.model.setQuery(self.query)
 
-    def on_activated(self, e):
-        print("activated", e)
-
-    def update_completer(self):
-        pass
-
-    def on_edited(self, str):
-        pass
-
-    def on_text_change(self, str):
-        # if len(str)>2 and not(self.is_completer):
-        #     self.set_completer()
-        #     print('might set it')
-        pass
 
     def paintEvent(self, e):
         painter = QPainter(self)
@@ -117,5 +108,4 @@ class ReservationOrderedWidget(QWidget):
         painter.setPen(pen)
         painter.drawRect(rect)
 
-    def sizeHint(self):
-        return QSize(250, 600)
+
