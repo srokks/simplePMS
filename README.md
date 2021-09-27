@@ -3,7 +3,13 @@
   <img alt="Version" src="https://img.shields.io/badge/version-0.1-blue.svg?cacheSeconds=2592000" />
 </p>
 
-> Simple property management system, based on sqlite db and PyQt
+> Simple property management system, based on sqlite db and PyQt </br>
+> Main features:</br>
+>  &emsp;&emsp;&emsp;- Reservation edit window </br>
+>  &emsp;&emsp;&emsp;- Reservation search window </br>
+>  &emsp;&emsp;&emsp;- Guest edit window </br>
+>  &emsp;&emsp;&emsp;- Guest search window </br>
+>  &emsp;&emsp;&emsp;- Room rack window </br>
 
 ## Usage
 

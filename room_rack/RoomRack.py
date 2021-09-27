@@ -6,7 +6,10 @@ from PyQt5.QtCore import QAbstractTableModel, QEvent, Qt, QRect, QMimeData, pyqt
 from PyQt5.QtWidgets import (
     QDialog,
     QSizeGrip,
+    QMdiSubWindow,
+    QInputDialog,
     QScrollArea,
+    QMdiArea,
     QWidget,
     QMainWindow,
     QApplication,
@@ -26,233 +29,175 @@ from PyQt5.QtWidgets import (
     QFrame
 )
 
-ROOMS = [str(x) for x in range(101,150)]
+import db.Connection
+from room_rack.Room import Rooms
+
 today = datetime.date.today()
 DAYS = [(today + datetime.timedelta(days=x)).strftime('%d.%m') for x in range(-3, 31)]
 tile_height = 25
 tile_width = 75
-days_limit =25
-rooms = len(ROOMS)
-from room_rack.dayTile import DayTile
+days_limit = 25
 
-class res_tile(QWidget):
-    def __init__(self):
-        '''
-        res_tile properties:
-        self.id
-        self.
-        '''
-        super(res_tile, self).__init__()
-        main_lay = QHBoxLayout()
+
+class RoomTile(QWidget):
+    def __init__(self, room):
+        super(RoomTile, self).__init__()
+        self.setFixedSize(tile_width, tile_height)
+        main_lay = QVBoxLayout()
         main_lay.setContentsMargins(0, 0, 0, 0)
         main_lay.setSpacing(0)
+        label = QLabel()
+        label.setText(room.room_no)
+        label.setAlignment(Qt.AlignVCenter)
+        label.setContentsMargins(5, 0, 0, 0)
+        label.setToolTip(f'{room.room_no}\n{room.room_type_id}\nFloor:{room.floor}')
+        main_lay.addWidget(label)
+
         self.setLayout(main_lay)
-        self._pressed = False
-
-        sample_res = {'id': '123', 'name': 'Jarek Sroka', 'color': 'yellow'}
-        self.res_id = sample_res['id']
-        self.name = sample_res['name']
-        if sample_res['color'] == '':
-            self.color = 'red'
-        else:
-            self.color = sample_res['color']
-
-    def mousePressEvent(self, event):
-        self._pressed = True
-        self.update()
-
-    def mouseReleaseEvent(self, event):
-        self._pressed = False
-        self.update()
-
-    def mouseMoveEvent(self, event):
-        pass
 
     def paintEvent(self, e):
         painter = QPainter(self)
         painter.setRenderHint(painter.Antialiasing)
-
-        if self._pressed == True:
-            path = QPainterPath()
-            path.addRoundedRect(2, 2, self.width() - 2, self.height() - 2, 3, 3)
-            pen = QPen(QColor('red'), 1)
-            painter.setPen(pen)
-            painter.fillPath(path, QColor('green'))
-            painter.drawPath(path)
-        else:
-            path = QPainterPath()
-            path.addRoundedRect(1, 1, self.width() - 1, self.height() - 1, 5, 5)
-            pen = QPen(QColor('red'), 1)
-            painter.setPen(pen)
-            painter.fillPath(path, QColor('red'))
-            painter.drawPath(path)
-        painter.end()
+        path = QPainterPath()
+        rect = QRect(0, 0, self.width(), self.height())
+        pen = QPen(QColor('red'), 1)
+        painter.setPen(pen)
+        painter.drawRect(rect)
 
 
-class day_label(QLabel):
-    def __init__(self, date=''):
-        super(day_label, self).__init__()
-        self.setFixedHeight(tile_height)
-        self.setFixedWidth(tile_width)
-        self.setText("Day")
-        self.setAlignment(Qt.AlignCenter)
-        self.setFrameShape(QFrame.Panel)
-        self.setFrameShadow(QFrame.Sunken)
-        self.date = datetime.date(2000,1,1)
-    def setDate(self,date):
-        self.date=date
-        self.setText(self.date.strftime('%d.%m'))
-        self.setToolTip(self.date.strftime('%d.%m.%Y'))
-    def mousePressEvent(self,e):
-        print(self.date,self.size())
-class room_label(QLabel):
-    def __init__(self, date=''):
-        super(room_label, self).__init__()
+class DayTile(QWidget):
+    def __init__(self):
+        super(DayTile, self).__init__()
         self.setFixedSize(tile_width, tile_height)
-        self.setText("Room")
-        self.setFrameShape(QFrame.Panel)
-        self.setFrameShadow(QFrame.Sunken)
-        self.setAlignment(Qt.AlignCenter)
-        self.room_id = None
-        self.setWordWrap(True)
-    def setID(self,room_id):
-        self.room_id = room_id
-        self.setText(self.room_id)
-class room_rack(QWidget):
+        main_lay = QVBoxLayout()
+        main_lay.setContentsMargins(0, 0, 0, 0)
+        main_lay.setSpacing(0)
+        label = QLabel()
+        label.setText('ss')
+        label.setAlignment(Qt.AlignVCenter)
+        label.setContentsMargins(5, 0, 0, 0)
+
+        main_lay.addWidget(label)
+
+        self.setLayout(main_lay)
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHint(painter.Antialiasing)
+        path = QPainterPath()
+        rect = QRect(0, 0, self.width(), self.height())
+        pen = QPen(QColor('blue'), 1)
+        painter.setPen(pen)
+        painter.drawRect(rect)
+
+
+class BlankWidget(QWidget):
+    def __init__(self, color):
+        super(BlankWidget, self).__init__()
+        self.color = color
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHint(painter.Antialiasing)
+        path = QPainterPath()
+        rect = QRect(0, 0, self.width(), self.height())
+        pen = QPen(QColor(self.color), 1)
+        painter.setPen(pen)
+        painter.drawRect(rect)
+
+
+class DaysWidget(QWidget):
+    def __init__(self):
+        super(DaysWidget, self).__init__()
+        self.setMaximumHeight(2 * tile_height)
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHint(painter.Antialiasing)
+        path = QPainterPath()
+        rect = QRect(0, 0, self.width(), self.height())
+        pen = QPen(QColor('blue'), 1)
+        painter.setPen(pen)
+        painter.drawRect(rect)
+
+
+class RoomsWidget(QScrollArea):
+    def __init__(self):
+        super(RoomsWidget, self).__init__()
+        self.setFixedWidth(tile_width)
+        self.set
+        lay = QVBoxLayout()
+        for i in range(50):
+            lay.addWidget(QPushButton(str(i)))
+        self.setLayout(lay)
+
+
+
+class ReservationsWidget(QWidget):
+    def __init__(self):
+        super(ReservationsWidget, self).__init__()
+
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHint(painter.Antialiasing)
+        path = QPainterPath()
+        rect = QRect(0, 0, self.width(), self.height())
+        pen = QPen(QColor('red'), 1)
+        painter.setPen(pen)
+        painter.drawRect(rect)
+
+
+class RoomRackWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setSpacing(0)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        # ----
-        day_scroll = QScrollArea()
-        day_scroll.setWidgetResizable(True)
-        day_scroll.setContentsMargins(0, 0, 0, 0)
-        day_scroll.setFrameShape(day_scroll.NoFrame)
-        day_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        day_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        day_scroll.setFixedHeight(tile_height)
-        day_wi = QWidget()
-        self.day_lay = QHBoxLayout()
-        self.day_lay.setSpacing(0)
-        self.day_lay.setContentsMargins(0, 0, 0, 0)
-        for i in range(days_limit):
-            lab = day_label()
-            lab.setDate(today+datetime.timedelta(days=i))
-            lab.setWordWrap(True)
-            self.day_lay.addWidget(lab)
 
+        self.load_reservations()
+        # ----- Test area
+        # Widget declarations
 
-        day_wi.setLayout(self.day_lay)
-        day_scroll.setWidget(day_wi)
-        # ---
-        top_layout = QHBoxLayout()
-        top_layout.setSpacing(0)
-        top_layout.setContentsMargins(0, 0, 0, 0)
-        self.filtr_btn = day_label()
-
-        self.filtr_btn.setText("FILTER")
-
-        # --
-        top_layout.addWidget(self.filtr_btn)
-        top_layout.addWidget(day_scroll)
-        top_layout.setSpacing(0)
-        top_layout.setContentsMargins(0, 0, 0, 0)
-        # --
-        room_scroll = QScrollArea()
-        room_scroll.setWidgetResizable(True)
-        room_scroll.setFrameShape(room_scroll.NoFrame)
-        room_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        room_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        room_scroll.setMaximumWidth(tile_width)
-        room_wi = QWidget()
-        self.room_lay = QVBoxLayout()
-        self.room_lay.setSpacing(0)
-        self.room_lay.setContentsMargins(0, 0, 0, 0)
-        for el in ROOMS:
-            lab = room_label()
-            lab.setID(el)
-            self.room_lay.addWidget(lab)
-        room_wi.setLayout(self.room_lay)
-        room_scroll.setWidget(room_wi)
-        # ------
-        grid_scroll = QScrollArea()
-        grid_scroll.setWidgetResizable(True)
-        grid_scroll.setFrameShape(grid_scroll.NoFrame)
-        grid_wi = QWidget()
-        self.grid_lay = QHBoxLayout()
-        self.grid_lay.setSpacing(0)
-        self.grid_lay.setContentsMargins(0, 0, 0, 0)
-        grid_scroll.verticalScrollBar().valueChanged.connect(
-            lambda value: room_scroll.verticalScrollBar().setValue(value))
-        grid_scroll.horizontalScrollBar().valueChanged.connect(
-            lambda value: day_scroll.horizontalScrollBar().setValue(value))
-        for i in range(len(self.day_lay)):
-            lay = QVBoxLayout()
-            lay.setSpacing(0)
-            lay.setContentsMargins(0,0,0,0)
-            date = self.day_lay.itemAt(i).widget().date
-            lay.setObjectName(date.strftime('%d.%m.%Y'))
-            for j in range(len(self.room_lay)):
-                tile = DayTile()
-                room_id = self.room_lay.itemAt(j).widget().room_id
-                tile.setObjectName(lay.objectName()+'|'+room_id)
-                lay.addWidget(tile)
-            self.grid_lay.addLayout(lay)
-        grid_wi.setLayout(self.grid_lay)
-        grid_scroll.setWidget(grid_wi)
-        # ----
-        control_layout = QHBoxLayout()
-        self.prev_day_btn = QPushButton()
-        self.prev_day_btn.setText('<-')
-        self.prev_day_btn.clicked.connect(self.prev_day_btn_on_click)
-        control_layout.addWidget(self.prev_day_btn)
-        self.today_btn = QPushButton()
-        self.today_btn.setText("today")
-        self.today_btn.clicked.connect(self.today_btn_on_click)
-        control_layout.addWidget(self.today_btn)
-        control_layout.addWidget(QPushButton("->"))
-        # ----
-        bottom_layout = QHBoxLayout()
-        bottom_layout.setSpacing(0)
-        bottom_layout.setContentsMargins(0, 0, 0, 0)
-        bottom_layout.addWidget(room_scroll)
-        bottom_layout.addWidget(grid_scroll)
-        self.main_layout.addLayout(top_layout)
-        self.main_layout.addLayout(bottom_layout)
-        self.main_layout.addLayout(control_layout)
-        self.setLayout(self.main_layout)
-        #self.grid_lay.addWidget(res_tile(), 0, 1, 1, 4)
-
-    def today_btn_on_click(self):
-        print(self.day_lay.sizeHint())
-        print(self.grid_lay.sizeHint())
-
-    def prev_day_btn_on_click(self):
-
-        #adds day label in up grid
-        lab = day_label()
-        lab.setDate((self.day_lay.itemAt(0).widget().date)-datetime.timedelta(days=1))
-        self.day_lay.insertWidget(0,lab)
-        lay = QVBoxLayout()
-        lay.setSpacing(0)
+        # Main layout
+        lay = QHBoxLayout()
         lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(0)
+        room_layout = QGridLayout()
+        room_layout.setContentsMargins(0, 0, 0, 0)
+        room_layout.setSpacing(0)
+        room_layout.addWidget(QPushButton('Filter'))
+        room_layout.addWidget(QPushButton('Zoom'))
+        room_layout.addWidget(RoomsWidget())
+        days_lay = QVBoxLayout()
+        days_lay.addWidget(DaysWidget())
+        days_lay.addWidget(ReservationsWidget())
+        lay.addLayout(room_layout)
+        lay.addLayout(days_lay)
+        self.setLayout(lay)
+
+    def load_reservations(self):
+        'Loads rooms from db and '
+        self.rooms = Rooms(db.Connection.Connection().db)
 
 
-        date = self.day_lay.itemAt(0).widget().date
-        lay.setObjectName(date.strftime('%d.%m.%Y'))
-        for j in range(len(self.room_lay)):
-            tile = DayTile()
-            room_id = self.room_lay.itemAt(j).widget().room_id
-            tile.setObjectName(lay.objectName() + '|' + room_id)
-            lay.addWidget(tile)
-        self.grid_lay.insertLayout(0,lay)
-        pass
-    
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        main_wi = QWidget()
+        main_lay = QVBoxLayout()
+        main_wi.setLayout(main_lay)
+
+        self.mdi_area = QMdiArea()
+        room_rack = RoomRackWindow()
+        main_lay.addWidget(self.mdi_area)
+        sub = QMdiSubWindow()
+        sub.setWidget(room_rack)
+        self.mdi_area.addSubWindow(sub)
+        sub.showMaximized()
+        self.setCentralWidget(main_wi)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = room_rack()
+    win = MainWindow()
     win.move(0, 0)
     win.resize(800, 600)
     win.show()

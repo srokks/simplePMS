@@ -59,6 +59,7 @@ class SearchLineLayout(QHBoxLayout):
 
 class SearchGuest(QWidget):
     clicked_widget = pyqtSignal(bool)
+    chosen_guest = pyqtSignal(int)
     def __init__(self,db = None,guest = None):
         if db == None:
             self.db = Connection().db
@@ -78,12 +79,13 @@ class SearchGuest(QWidget):
 
         self.search_line_layout = SearchLineLayout()
         self.search_line_layout.update_querry.connect(self.update_querry)
-        self.search_line_layout.choose_btn.clicked.connect(self.update_querry)
+        self.search_line_layout.choose_btn.clicked.connect(self.choose_btn_clicked)
 
         self.guest_table = QTableView()
         self.guest_table.setEditTriggers(self.guest_table.NoEditTriggers)
         self.guest_table.setSelectionBehavior(self.guest_table.SelectRows)
         self.guest_table.doubleClicked.connect(self.table_on_dclick)
+        self.guest_table.clicked.connect(self.guest_selected)
         self.guest_table.verticalHeader().hide()
         self.model = QSqlRelationalTableModel()
         self.guest_table.setModel(self.model)
@@ -102,6 +104,7 @@ class SearchGuest(QWidget):
         self.update_querry()
         main_layout.addLayout(self.search_line_layout)
         main_layout.addWidget(self.guest_table)
+        self.guest_table.hideColumn(0)
         self.setLayout(main_layout)
 
     def table_on_dclick(self,e):
@@ -110,8 +113,12 @@ class SearchGuest(QWidget):
         temp_guest.fetch_by_id(self.db,self.model.index(e.row(),0).data())
         self.dialog = editGuest(db=self.db,guest=temp_guest)
         self.dialog.show()
-
-
+    def choose_btn_clicked(self):
+        #int(self.model.index(self.guest_table.currentIndex().row(),0).data())
+        self.chosen_guest.emit(int(self.model.index(self.guest_table.currentIndex().row(),0).data()))
+        self.parent().close()
+    def guest_selected(self,e):
+        self.search_line_layout.choose_btn.setDisabled(False)
     def keyReleaseEvent(self, e : QKeyEvent):
         if(e.key()==Qt.Key_Escape):
             self.close_btn_on_click()

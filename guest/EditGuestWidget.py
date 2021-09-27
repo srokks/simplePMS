@@ -83,7 +83,7 @@ class editGuest(QWidget):
 
 
     def init_guest(self,guest):
-        'in case of passed guest from parent widget fuction sets text in line edits'
+        'in case of passed guest_id_signal from parent widget fuction sets text in line edits'
         if guest==None:
             pass
         else:
@@ -110,7 +110,7 @@ class editGuest(QWidget):
             self.showdialog('updated')
 
     def new_btn_on_click(self):
-        # gather info -> prepare querry - > execute querry -> init window with guest
+        # gather info -> prepare querry - > execute querry -> init window with guest_id_signal
         #TODO: connection from main app
 
         new_guest = self.gather_data()

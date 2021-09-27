@@ -15,7 +15,6 @@ from guest.Guest import Guest
 
 class ReservationOrderedWidget(QWidget):
     is_completer = False
-
     def __init__(self, parent=None, db=None,guest = None):
         if db == None:
             self.db = Connection().db
@@ -30,6 +29,7 @@ class ReservationOrderedWidget(QWidget):
         self.setMinimumWidth(300)
         self.setMaximumHeight(400)
         self.setMaximumWidth(400)
+
         main_layout = QHBoxLayout()
 
         form_lay = QFormLayout()
@@ -66,7 +66,7 @@ class ReservationOrderedWidget(QWidget):
         self.last_stay_le = QLineEdit()
         self.last_stay_le.setDisabled(True)
         form_lay.setLabelAlignment(Qt.AlignLeft)
-        form_lay.addRow('Title/guest type:', gender_type_lay)
+        form_lay.addRow('Title/guest_id_signal type:', gender_type_lay)
         form_lay.addRow('Last name:', self.last_name_le)
         form_lay.addRow('First name:', self.first_name_le)
         form_lay.addRow('Street:', self.street_le)
@@ -80,7 +80,7 @@ class ReservationOrderedWidget(QWidget):
         self.init_guest(self.guest)
 
     def init_guest(self, guest):
-        'in case of passed guest from parent widget fuction sets text in line edits'
+        'in case of passed guest_id_signal from parent widget fuction sets text in line edits'
         if guest == None:
             pass
         else:

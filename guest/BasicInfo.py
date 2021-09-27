@@ -12,7 +12,7 @@ from guest.LineEdit import LineEdit
 
 
 class BasicInfo(QWidget):
-    'Widget for basic guest info'
+    'Widget for basic guest_id_signal info'
     obligatories_checked = pyqtSignal(bool)
 
     def __init__(self):
@@ -80,9 +80,9 @@ class BasicInfo(QWidget):
             el.textChanged.connect(self.check_obligatories)
 
     def type_cmb_on_change(self, index):
-        """Change label on id_number_lbl according to type of guest"""
+        """Change label on id_number_lbl according to type of guest_id_signal"""
         if index == 0:
-            '''sets labels for guest '''
+            '''sets labels for guest_id_signal '''
             self.id_number_lbl.setText('ID number')
             self.obligatories_list.pop(0)
             self.id_number_le.setObligatory(False)

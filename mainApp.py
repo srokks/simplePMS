@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 
 from guest.EditGuestWidget import editGuest
 from guest.SearchGuestWidget import SearchGuest
-from room_rack.RoomRack import room_rack
+from room_rack.RoomRack import RoomRackWindow
 from reservation.ResEdit import ReservationEdit
 
 class ActionBtnLayout(QWidget):
@@ -18,11 +18,11 @@ class ActionBtnLayout(QWidget):
         super(ActionBtnLayout, self).__init__()
         self.setMaximumHeight(50)
         lay = QHBoxLayout()
-        self.search_guest_btn = QPushButton('/guest/SearchGuestWidget')
+        self.search_guest_btn = QPushButton('/guest_id_signal/SearchGuestWidget')
         lay.addWidget(self.search_guest_btn)
-        self.edit_guest_btn = QPushButton('/guest/EditGuestWidget')
+        self.edit_guest_btn = QPushButton('/guest_id_signal/EditGuestWidget')
         lay.addWidget(self.edit_guest_btn)
-        self.room_rack_btn = QPushButton('/room_rack/RoomRack.py')
+        self.room_rack_btn = QPushButton('/RoomRackWindow/RoomRack.py')
         lay.addWidget(self.room_rack_btn)
         self.res_edit_btn = QPushButton('/reservation/ResEdit.py')
         lay.addWidget(self.res_edit_btn)
@@ -53,12 +53,12 @@ class MainWindow(QMainWindow):
 
     def res_edit_show(self):
         sub = QMdiSubWindow()
-        sub.setWidget(ReservationEdit())
+        sub.setWidget(ReservationEdit(self.mdi_area))
         self.mdi_area.addSubWindow(sub)
         sub.show()
     def room_rack_show(self):
         sub = QMdiSubWindow()
-        sub.setWidget(room_rack())
+        sub.setWidget(RoomRackWindow())
         self.mdi_area.addSubWindow(sub)
         sub.show()
 
@@ -84,5 +84,7 @@ if __name__ == "__main__":
     # app.setStyleSheet(qdarkstyle.load_stylesheet())
     MainWindow = MainWindow()
     MainWindow.resize(1024,768)
+    MainWindow.move(500,0)
     MainWindow.show()
+    MainWindow.room_rack_show()
     sys.exit(app.exec_())

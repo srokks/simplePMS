@@ -57,7 +57,6 @@ class Guest(Address):
         )
         query.bindValue(':guest_id',id)
         query.exec_()
-        print(query.lastError())
         model.setQuery(query)
 
         self.guest_id = model.index(0,0).data()
@@ -87,7 +86,7 @@ class Guest(Address):
         else:
             print("*ERROR*")
 
-        print('*inserting guest**')
+        print('*inserting guest_id_signal**')
         querry = QSqlQuery(db=db)
         querry.prepare(
             "INSERT INTO "
@@ -110,6 +109,7 @@ class Guest(Address):
         else:
             print('error ', querry.lastError().text())
             return False, querry.lastError().text()
+
     def get_address_id_by_guest_id(self,db,guest_id:int):
         'returns address_id from db based on guest_id'
         model = QSqlQueryModel()
