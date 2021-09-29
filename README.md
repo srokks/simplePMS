@@ -3,13 +3,18 @@
   <img alt="Version" src="https://img.shields.io/badge/version-0.1-blue.svg?cacheSeconds=2592000" />
 </p>
 
-> Simple property management system, based on sqlite db and PyQt </br>
-> Main features:</br>
->  &emsp;&emsp;&emsp;- Reservation edit window </br>
->  &emsp;&emsp;&emsp;- Reservation search window </br>
->  &emsp;&emsp;&emsp;- Guest edit window </br>
->  &emsp;&emsp;&emsp;- Guest search window </br>
->  &emsp;&emsp;&emsp;- Room rack window </br>
+> It's my aproach to build hotem management system using PyQt with sqlitedb connected.
+> 
+<h4 align="center">Functionality</h4>
+**Guest edit window** - _partialy working_
+
+**Guest search window** - _partialy working_
+
+**Reservation edit window** - _partialy working_
+
+**Reservation search** - _planned_
+
+**Reservation search** - _working_
 
 ## Usage
 
