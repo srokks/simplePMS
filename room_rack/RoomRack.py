@@ -39,106 +39,7 @@ tile_width = 80
 days_limit = 10
 
 
-class RoomTile(QWidget):
-    def __init__(self, room):
-        super(RoomTile, self).__init__()
-        self.setFixedSize(tile_width, tile_height)
-        main_lay = QVBoxLayout()
-        main_lay.setContentsMargins(0, 0, 0, 0)
-        main_lay.setSpacing(0)
-        label = QLabel()
-        label.setText(room.room_no)
-        label.setAlignment(Qt.AlignVCenter)
-        label.setContentsMargins(5, 0, 0, 0)
-        label.setToolTip(f'{room.room_no}\n{room.room_type_id}\nFloor:{room.floor}')
-        main_lay.addWidget(label)
-
-        self.setLayout(main_lay)
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHint(painter.Antialiasing)
-        path = QPainterPath()
-        rect = QRect(0, 0, self.width(), self.height())
-        pen = QPen(QColor('red'), 1)
-        painter.setPen(pen)
-        painter.drawRect(rect)
-
-
-
-
-
-class BlankTile(QWidget):
-    def __init__(self):
-        super(BlankTile, self).__init__()
-        self.setFixedSize(tile_width, tile_height)
-        main_lay = QVBoxLayout()
-        main_lay.setContentsMargins(0, 0, 0, 0)
-        main_lay.setSpacing(0)
-        label = QLabel()
-        label.setAlignment(Qt.AlignVCenter)
-        label.setContentsMargins(5, 0, 0, 0)
-
-        main_lay.addWidget(label)
-
-        self.setLayout(main_lay)
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHint(painter.Antialiasing)
-        path = QPainterPath()
-        rect = QRect(0, 0, self.width(), self.height())
-        pen = QPen(QColor('green'), 1)
-        painter.setPen(pen)
-        painter.drawRect(rect)
-
-
-class BlankWidget(QWidget):
-    def __init__(self, color):
-        super(BlankWidget, self).__init__()
-        self.color = color
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHint(painter.Antialiasing)
-        path = QPainterPath()
-        rect = QRect(0, 0, self.width(), self.height())
-        pen = QPen(QColor(self.color), 1)
-        painter.setPen(pen)
-        painter.drawRect(rect)
-
-
-
-
-class DayTile(QWidget):
-    def __init__(self,date:QDate):
-        super(DayTile, self).__init__()
-        self.setFixedSize(tile_width, tile_height)
-        main_lay = QVBoxLayout()
-        main_lay.setContentsMargins(0, 0, 0, 0)
-        main_lay.setSpacing(0)
-        label = QLabel()
-        font = QFont('Arial',11)
-        label.setFont(font)
-
-        label.setText(date.toString('dd/MM (ddd)'))
-        label.setToolTip(date.toString('dd/MM/yyyy'))
-        label.font().setPointSize(2)
-        label.setAlignment(Qt.AlignVCenter)
-        label.setContentsMargins(5, 0, 0, 0)
-
-        main_lay.addWidget(label)
-
-        self.setLayout(main_lay)
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHint(painter.Antialiasing)
-        path = QPainterPath()
-        rect = QRect(0, 0, self.width(), self.height())
-        pen = QPen(QColor('blue'), 1)
-        painter.setPen(pen)
-        painter.drawRect(rect)
+from room_rack.rack_tiles import *
 
 class DaysWidget(QScrollArea):
     def __init__(self,date_from:QDate,days_limit:int):
@@ -170,7 +71,6 @@ class DaysWidget(QScrollArea):
         main_widget.setLayout(combo_lay)
         self.setWidget(main_widget)
 
-
 class RoomsWidget(QScrollArea):
     v_scroll = pyqtSignal(int)
 
@@ -185,6 +85,7 @@ class RoomsWidget(QScrollArea):
         lay = QVBoxLayout()
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
+        lay.setAlignment(Qt.AlignTop or Qt.AlignLeft)
         for room in rooms:
             lay.addWidget(RoomTile(room))
         main_widget.setLayout(lay)
@@ -225,53 +126,6 @@ class ResWidget(QWidget):
         self.clicked = False
         self.repaint()
 
-
-class ResTile(QWidget):
-    def __init__(self,parent=None):
-        self.clicked = False
-        super(ResTile, self).__init__()
-        self.parent:QGridLayout = parent
-        self.setFixedSize(int(tile_width/2), tile_height)
-        main_lay = QVBoxLayout()
-        main_lay.setContentsMargins(0, 0, 0, 0)
-        main_lay.setSpacing(0)
-        label = QLabel()
-        label.setAlignment(Qt.AlignVCenter)
-        label.setContentsMargins(5, 0, 0, 0)
-
-        main_lay.addWidget(label)
-
-        self.setLayout(main_lay)
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHint(painter.Antialiasing)
-        path = QPainterPath()
-        rect = QRect(0, 0, self.width(), self.height())
-        pen = QPen(QColor('black'), 1)
-        painter.setPen(pen)
-        painter.drawRect(rect)
-        if self.clicked:
-            path = QPainterPath()
-            rect = QRect(0, 0, self.width(), self.height())
-            pen = QPen(QColor('blue'), 1)
-            painter.setPen(pen)
-            brush = QBrush()
-            brush.setStyle(Qt.SolidPattern)
-            painter.fillRect(rect,brush)
-    def mousePressEvent(self, e):
-        self.clicked = True
-        index = self.parent.indexOf(self)
-        pos = self.parent.getItemPosition(index)
-        #way to insert res tiles in grid
-        # self.parent.addWidget(ResWidget(),pos[0],pos[1],1,1)
-        self.repaint()
-
-    def mouseReleaseEvent(self, e):
-        self.clicked = False
-        self.repaint()
-
-
 class ReservationsWidget(QScrollArea):
 
 
@@ -285,13 +139,15 @@ class ReservationsWidget(QScrollArea):
         main_widget = QWidget()
         lay = QGridLayout()
         lay.setContentsMargins(0, 0, 0, 0)
-        lay.setAlignment(Qt.AlignLeft)
+        lay.setAlignment(Qt.AlignTop or Qt.AlignLeft)
         lay.setSpacing(0)
-        for i in range(1,rooms):
-            for j in range(days_count*2):
-                lay.addWidget(ResTile(parent=lay), i, j)
+        # for i in range(rooms):
+        #     for j in range(days_count*2):
+        #         lay.addWidget(ResTile(parent=lay,date=QDate().currentDate().addDays(int(j/2))),i,j)
+        for i in range(rooms):
+            lay.addWidget(ResTile(parent=lay, ),i,0)
 
-        lay.addWidget(ResWidget(),1,1,1,2)
+
         main_widget.setLayout(lay)
 
         self.setWidget(main_widget)
