@@ -141,11 +141,10 @@ class ReservationsWidget(QScrollArea):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setAlignment(Qt.AlignTop or Qt.AlignLeft)
         lay.setSpacing(0)
-        # for i in range(rooms):
-        #     for j in range(days_count*2):
-        #         lay.addWidget(ResTile(parent=lay,date=QDate().currentDate().addDays(int(j/2))),i,j)
         for i in range(rooms):
-            lay.addWidget(ResTile(parent=lay, ),i,0)
+            for j in range(days_count):
+                lay.addWidget(ResTile(parent=lay,date=QDate().currentDate().addDays(int(j/2))),i,j)
+
 
 
         main_widget.setLayout(lay)
