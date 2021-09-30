@@ -1,8 +1,8 @@
 import datetime
 import sys
-from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QFont, QPainterPath, QPixmap, QDrag
+from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QFont, QPainterPath, QPixmap, QDrag,QMouseEvent,QHoverEvent
 from PyQt5.QtSql import QSqlDatabase, QSqlTableModel
-from PyQt5.QtCore import QAbstractTableModel, QEvent, Qt, QRect, QMimeData, pyqtSignal,QDate
+from PyQt5.QtCore import QAbstractTableModel, QEvent, Qt, QRect, QMimeData, pyqtSignal,QDate,QObject
 from PyQt5.QtWidgets import (
     QDialog,
     QSizeGrip,
@@ -114,12 +114,17 @@ class RoomTile(QWidget):
         painter.setPen(pen)
         painter.drawRect(rect)
 
+class SomeFilter(QObject):
+    def eventFilter(self, obj, ev):
+        print("Event filtering ok")
+        return True
+
 class ResTile(QWidget):
     def __init__(self,parent=None,date:QDate=None):
         self.clicked = False
         super(ResTile, self).__init__()
         self.parent:QGridLayout = parent
-        self.setFixedSize(int(tile_width/2), tile_height)
+        self.setFixedSize(int(tile_width), tile_height)
         main_lay = QVBoxLayout()
         main_lay.setContentsMargins(0, 0, 0, 0)
         main_lay.setSpacing(0)
@@ -130,7 +135,8 @@ class ResTile(QWidget):
         main_lay.addWidget(label)
 
         self.setLayout(main_lay)
-
+        self.installEventFilter(SomeFilter())
+        self.update()
     def paintEvent(self, e):
         painter = QPainter(self)
         painter.setRenderHint(painter.Antialiasing)
@@ -147,15 +153,3 @@ class ResTile(QWidget):
             brush = QBrush()
             brush.setStyle(Qt.SolidPattern)
             painter.fillRect(rect,brush)
-    def mousePressEvent(self, e):
-        self.clicked = True
-        index = self.parent.indexOf(self)
-        pos = self.parent.getItemPosition(index)
-        #way to insert res tiles in grid
-        # self.parent.addWidget(ResWidget(),pos[0],pos[1],1,1)
-        print(self.property('date'))
-        self.repaint()
-
-    def mouseReleaseEvent(self, e):
-        self.clicked = False
-        self.repaint()
