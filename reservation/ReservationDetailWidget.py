@@ -8,21 +8,24 @@ from PyQt5.QtWidgets import (
     QCalendarWidget,
     QSizePolicy,
 QDateEdit,
-
 )
 from PyQt5.QtCore import QRegExp,pyqtSignal
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtGui import QRegExpValidator,QIntValidator
 from PyQt5.QtCore import Qt,QDate
 from reservation.RoomingListWidget import RoomingListWidget
 from guest.Guest import Guest
 
 class ReservationDetailWidget(QWidget):
     guest_id_signal = pyqtSignal(int)
+    reservation_valid = pyqtSignal() # if all data res are valid
+
     def __init__(self):
         super(ReservationDetailWidget, self).__init__()
+        self.obligatories_fielsd = []
         main_layout = QHBoxLayout()
         form1 = QFormLayout()
         form1.setHorizontalSpacing(20)
+
 
         self.room_type_cmb = QComboBox()
         # TODO: load room_types from DB
@@ -32,9 +35,11 @@ class ReservationDetailWidget(QWidget):
         self.arrival_date = QDateEdit()
         self.arrival_date.setDate(QDate().currentDate())
         self.arrival_date.setCalendarPopup(True)
-
+        self.arrival_date.dateChanged.connect(self.night_recalculate)
         self.nights = QLineEdit()
-        self.nights.textEdited.connect(self.departure_date_recalculate)
+        val = QIntValidator()
+        self.nights.setValidator(val)
+        self.nights.textChanged.connect(self.departure_date_recalculate)
         self.room_no = QLineEdit()
         self.guests_no = QLineEdit()
 
@@ -70,22 +75,37 @@ class ReservationDetailWidget(QWidget):
         main_layout.addLayout(form2)
         main_layout.addStretch()
         self.setLayout(main_layout)
+        for el in self.findChildren(QLineEdit):
+            el.textChanged.connect(self.check_obligatories)
 
     def al(self,e:QDate):
         self.arrival_date.setText(e.toString(Qt.SystemLocaleShortDate))
         self.cal.close()
         pass
 
-    def departure_date_recalculate(self, e):
+    def departure_date_recalculate(self, e:str):
         'Trigered by changing night value. Recalculate departure date and update it'
         if e!='':
             arival_date = self.arrival_date.date()
             departure_date = arival_date.addDays(int(e))
             self.departure_date.setDate(departure_date)
+            self.nights.setStyleSheet('background-color:white')
+        elif e=='':
+            # self.night_recalculate(self.departure_date.date())
+            self.nights.setStyleSheet('background-color:red')
+    def check_obligatories(self):
+        self.reservation_valid.emit()
     def night_recalculate(self,date):
         'Trigered by changing departure value. Recalculate nigth value and update it'
-        self.nights.setText(str(self.arrival_date.date().daysTo(date)))
-
-
+        self.nights.setText(str(self.arrival_date.date().daysTo(self.departure_date.date())))
+    def init_res_details(self,res):
+        self.reservation = res
+        self.room_type_cmb.setCurrentIndex(self.reservation.room_type)
+        self.guests_no.setText(str(self.reservation.guest_no))
+        self.arrival_date.setDate(self.reservation.date_from)
+        self.departure_date.setDate(self.reservation.date_to)
+        self.res_number.setText(self.reservation.booking_no)
+        self.room_no.setText(str(self.reservation.room_no))
+        self.guest_id_signal.emit(self.reservation.guest_id)# emits signal to catch by ordered widget
     def gather_res_details(self):
         pass
