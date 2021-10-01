@@ -25,7 +25,7 @@ class ReservationDetailWidget(QWidget):
         form1.setHorizontalSpacing(20)
 
         self.room_type_cmb = QComboBox()
-        # TODO: get room type from db
+        # TODO: load room_types from DB
         self.room_type_cmb.addItems(['SGL', 'DBL'])
 
 
@@ -57,19 +57,17 @@ class ReservationDetailWidget(QWidget):
         self.res_number = QLineEdit()
 
         self.res_type_cmb = QComboBox()
+        # TODO: load res_types from DB
         self.res_type_cmb.addItems(["1.Guarantee",'2.Unguarantee','3.Option'])
 
         form2.addRow("Room:", self.room)
         form2.addRow("Departure:", self.departure_date)
         form2.addRow("Reservation no.:", self.res_number)
         form2.addRow("Reservation type:", self.res_type_cmb)
-        # form2.addRow("Channel:", QComboBox())
 
-        lay3 = RoomingListWidget()
 
         main_layout.addLayout(form1)
         main_layout.addLayout(form2)
-        # main_layout.addWidget(lay3)
         main_layout.addStretch()
         self.setLayout(main_layout)
 

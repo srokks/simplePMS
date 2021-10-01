@@ -86,5 +86,5 @@ if __name__ == "__main__":
     MainWindow.resize(1024,768)
     MainWindow.move(500,0)
     MainWindow.show()
-    MainWindow.room_rack_show()
+    MainWindow.res_edit_show()
     sys.exit(app.exec_())

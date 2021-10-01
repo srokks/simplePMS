@@ -39,7 +39,7 @@ from reservation.ReservationAvelRoomsWidget import ReservationAvelRooms
 from reservation.ReservationDetailWidget import ReservationDetailWidget
 from reservation.ReservationOrderedWidget import ReservationOrderedWidget
 from reservation.ReservationActionLayout import ReservationActionLayout
-
+from reservation.RoomingListWidget import RoomingListWidget
 
 
 class ReservationEdit(QWidget):
@@ -54,11 +54,11 @@ class ReservationEdit(QWidget):
         self.parent = parent
         self.setMinimumWidth(800)
 
-        main_layout = QGridLayout()
+        main_layout = QGridLayouxwt()
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(5,5,5,5)
         res_details = ReservationDetailWidget()
-
+        rooming_list = RoomingListWidget()
         self.res_ordered = ReservationOrderedWidget()
         rooms_avel = ReservationAvelRooms()
         action_lay = ReservationActionLayout()
@@ -68,7 +68,9 @@ class ReservationEdit(QWidget):
         action_lay.init_guest.connect(self.choose_guest_on_click)
         tab = QTabWidget()
         tab.addTab(res_details,"Basic")
-        tab.addTab(QPushButton(),"Rooming List")
+        tab.addTab(rooming_list,"Rooming List")
+
+        tab.setCurrentIndex(1) # DEBUG: focuses on rooming list
         main_layout.addWidget(self.res_ordered,0,0)
         main_layout.addWidget(rooms_avel,0,1)
         main_layout.addWidget(tab,1,0,1,3)
