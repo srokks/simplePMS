@@ -22,6 +22,8 @@
 python3 ./mainApp.py
 ```
 
+## Screenshots
+<img src="https://db3pap003files.storage.live.com/y4mwRlThpfrWqFcvLkdmxAFJPv4L20S8BV2IFc88OLBoVk6brEri4g1fRmLxCmcjBiNir75oNP0pwtX-bPP4X3rSQprCPoM7UyCx9tZxdy78VyMrHGp3x8DyMGZMEDeOhInxaO4Z-sUBYiPzrcPh6Hezmw-3kwbGSYBcH2Pcs4tEsbvNNOqLXwZXEWkQ8eHXCXr?width=660&height=409&cropmode=none" width="660" height="409" />
 ## Author
 
 👤 **srokks**
