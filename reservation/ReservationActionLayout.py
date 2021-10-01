@@ -49,6 +49,7 @@ class ReservationActionLayout(QVBoxLayout):
         self.search_guest_btn.setText("Search guest")
         self.new_res_btn = QPushButton()
         self.new_res_btn.setText("New")
+        self.new_res_btn.setDisabled(True)
         self.new_res_btn.clicked.connect(self.create_res_signal.emit)
         # self.search_guest_btn.clicked.connect(self.search_guest_btn_clicked)
         self.addWidget(self.new_res_btn)
