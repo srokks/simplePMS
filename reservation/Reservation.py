@@ -1,9 +1,10 @@
 from db.Connection import Connection
+from PyQt5.QtCore import QDate
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 
 
 class Reservation:
-    def __init__(self, booking_no):
+    def __init__(self, booking_no=None):
         self.booking_no = booking_no
         self.guest_id = None
         self.date_from = None
@@ -11,7 +12,7 @@ class Reservation:
         self.room_no = None
         self.guest_no = None
         self.booking_status_id = None
-        self.booking_channel_id = None
+        self.room_type = None
         self.nights = 0
 
     def fetch_by_id(self, db):
@@ -27,12 +28,12 @@ class Reservation:
             model.setQuery(query)
             self.booking_no = model.index(0, 0).data()
             self.guest_id = model.index(0, 1).data()
-            self.date_from = model.index(0, 2).data()
-            self.date_to = model.index(0, 3).data()
+            self.date_from = QDate(int(model.index(0, 2).data()[6:]),int(model.index(0, 2).data()[3:5]),int(model.index(0, 2).data()[0:2]))
+            self.date_to = QDate(int(model.index(0, 3).data()[6:]),int(model.index(0, 3).data()[3:5]),int(model.index(0, 3).data()[0:2]))
             self.room_no =str( model.index(0, 4).data())
             self.guest_no = model.index(0, 5).data()
             self.booking_status_id = model.index(0, 6).data()
-            self.booking_channel_id = model.index(0, 7).data()
+            self.room_type = model.index(0, 7).data()
         else:
             print('ERROR')
         return self
@@ -42,7 +43,7 @@ class Reservation:
         querry.prepare(
             "INSERT INTO "
             "tblBookings (bBookingNumber, bGuestID, bDateFrom, bDateTo, bRoomCount, bGuestCount, bBookingStatusID, bBookingChannelID)"
-            "VALUES (:booking_no ,:guest_id ,:date_from,:date_to,:room_no,:guest_no,:booking_status_id,:booking_channel_id)"
+            "VALUES (:booking_no ,:guest_id ,:date_from,:date_to,:room_no,:guest_no,:booking_status_id,:room_type)"
         )
         self.booking_no = self._gen_res_no(db)
         querry.bindValue(":booking_no", self.booking_no)
@@ -52,7 +53,7 @@ class Reservation:
         querry.bindValue(":room_no", self.room_no)
         querry.bindValue(":guest_no", self.guest_no)
         querry.bindValue(":booking_status_id", self.booking_status_id)
-        querry.bindValue(":booking_channel_id", self.booking_channel_id)
+        querry.bindValue(":room_type", self.room_type)
         if querry.exec_():
             return True
         else:
@@ -85,10 +86,14 @@ class Reservation:
             return result
         else:
             return None
-
-
+    def is_valid(self):
+        if  self.date_from is None or self.date_to:
+            return False
+        else:
+            return True
 if __name__ == '__main__':
     db = Connection().db
     res = Reservation('210002').fetch_by_id(db)
-    res.insert(db)
+    resa = Reservation()
+    print(resa.is_valid(),res.is_valid())
     print(res.booking_no)
