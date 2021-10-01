@@ -93,7 +93,8 @@ class ReservationEdit(QWidget):
     def res_inited(self, e):
         # Gather info from res details -
         print('sss', e)
-
+    def push_res(self):
+        pass
     def new_res_btn_clicked(self):
         '''Triggered by new_btn'''
         # TODO: insert to db logic
