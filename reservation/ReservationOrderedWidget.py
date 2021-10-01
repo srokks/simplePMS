@@ -34,9 +34,10 @@ class ReservationOrderedWidget(QWidget):
 
         form_lay = QFormLayout()
         form_lay.setLabelAlignment(Qt.AlignLeft)
-
+        #TODO: gender cmb vals from lang file
         self.gender_cmb = QComboBox()
         self.gender_cmb.addItems(['', 'Mr.', 'Mrs.'])
+        #TODO: guest_type_cmb - types from lang file
         self.guest_type_cmb = QComboBox()
         self.guest_type_cmb.addItems(['', 'Guest', 'Agent', 'Company'])
         self.guest_type_cmb.setDisabled(True)
@@ -49,10 +50,12 @@ class ReservationOrderedWidget(QWidget):
 
         count_pstcd_cty = QHBoxLayout()
         count_pstcd_cty.setSpacing(1)
+
         self.country_le = QLineEdit()
         self.post_code = QLineEdit()
         self.city_le=QLineEdit()
-        count_pstcd_cty.addWidget(self.country_le)
+
+
         count_pstcd_cty.addWidget(self.post_code)
         count_pstcd_cty.addWidget(self.city_le)
 
@@ -70,7 +73,8 @@ class ReservationOrderedWidget(QWidget):
         form_lay.addRow('Last name:', self.last_name_le)
         form_lay.addRow('First name:', self.first_name_le)
         form_lay.addRow('Street:', self.street_le)
-        form_lay.addRow('Country/Post code/City:', count_pstcd_cty)
+        form_lay.addRow('Post code/City:', count_pstcd_cty)
+        form_lay.addRow('Country',self.country_le)
         form_lay.addRow('Phone:', self.phone_le)
         form_lay.addRow('Email:', self.mail_address_le)
         form_lay.addRow('Last stay:', self.last_stay_le)
@@ -81,7 +85,7 @@ class ReservationOrderedWidget(QWidget):
 
     def init_guest(self, guest):
         'in case of passed guest_id_signal from parent widget fuction sets text in line edits'
-        if guest == None:
+        if guest is None:
             pass
         else:
             self.gender_cmb.setCurrentIndex(guest.gender+1)
