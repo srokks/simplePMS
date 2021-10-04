@@ -16,8 +16,8 @@ from guest.Guest import Guest
 class ReservationOrderedWidget(QWidget):
     is_completer = False
     def __init__(self, parent=None, db=None,guest = None):
-        if db == None:
-            self.db = Connection().db
+        if db is None:  # if parent widget don't pass database
+            self.db = Connection().db  # init new connection
         else:
             self.db = db
         self.guest=guest
