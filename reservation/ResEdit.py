@@ -44,67 +44,75 @@ from reservation.RoomingListWidget import RoomingListWidget
 
 class ReservationEdit(QWidget):
     def __init__(self, parent=None, db=None, res=None):
-        if db is None:
-            self.db = Connection().db
+        if db is None:  # if parent widget don't pass database
+            self.db = Connection().db  # init new connection
         else:
             self.db = db
-        if res is None:
-            res = Reservation()
+        if res is None:  # if parent widget don't pass reservation
+            self.reservation = None  # init Null reservation
         else:
             self.reservation = res
-        self.reservation = Reservation('210002').fetch_by_id(self.db)  # DEBUG: init reservation
+
+        # self.reservation = Reservation('210002').fetch_by_id(self.db)  # DEBUG: init reservation
         super(ReservationEdit, self).__init__()
 
         self.parent = parent
         self.setMinimumWidth(800)
-
-        main_layout = QGridLayout()
+        # ----
+        main_layout = QGridLayout()  # main layout - grid
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(5, 5, 5, 5)
+        # ----
 
-        res_details = ReservationDetailWidget()
-        res_details.guest_id_signal.connect(self.populate_guest_info)
-        res_details.reservation_valid.connect(self.push_res)
+        # --- Init main widgets
+        self.res_details = ReservationDetailWidget()
+        self.guest_info = ReservationOrderedWidget()
         rooming_list = RoomingListWidget()
-
-        self.res_ordered = ReservationOrderedWidget()
-
-        res_details.init_res_details(self.reservation)
         rooms_avel = ReservationAvelRooms()
-        action_lay = ReservationActionLayout()
+        self.action_lay = ReservationActionLayout()
+        # -----
+        self.res_details.guest_id_signal.connect(self.populate_guest_info) # catches guest_id signal and populate
 
-        action_lay.search_guest_btn.clicked.connect(self.search_guest_btn_clicked)
-        action_lay.new_res_btn.clicked.connect(self.new_res_btn_clicked)
+        self.res_details.init_res_details(self.reservation) # inits res_details with reservation
 
+        self.action_lay.search_guest_btn.clicked.connect(self.search_guest_btn_clicked) #
+        self.action_lay.new_res_btn.clicked.connect(self.new_res_btn_clicked)
+        # -----
         tab = QTabWidget()
         tab.addTab(QPushButton(), "All reservations")
-        tab.addTab(res_details, "Basic")
+        tab.addTab(self.res_details, "Basic")
         tab.addTab(rooming_list, "Rooming List")
-
+        # -----
         tab.setCurrentIndex(1)  # DEBUG: focuses on rooming list
-        main_layout.addWidget(self.res_ordered, 0, 0)
+        # ----- Main layout widgets push logic
+        main_layout.addWidget(self.guest_info, 0, 0)
         main_layout.addWidget(rooms_avel, 0, 1)
         main_layout.addWidget(tab, 1, 0, 1, 3)
-        main_layout.addLayout(action_lay, 0, 2, 3, 1)
-        res_details.guest_id_signal.connect(self.choose_guest_on_click)
-
+        main_layout.addLayout(self.action_lay, 0, 2, 3, 1)
+        # -----
+        # res_details.guest_id_signal.connect(self.choose_guest_on_click) # catches if
+        self.res_details.reservation_valid.connect(self.on_valid_reservation) # catches signal if form is valid filled
+        # -----
         self.setLayout(main_layout)
 
-    def res_inited(self, e):
-        # Gather info from res details -
-        print('sss', e)
-    def push_res(self):
-        pass
+
+
+    def on_valid_reservation(self, e):
+        self.action_lay.new_res_btn.setDisabled(e)
+        print('sss')
+
     def new_res_btn_clicked(self):
         '''Triggered by new_btn'''
         # TODO: insert to db logic
+        self.reservation = self.res_details.gather_res_details()
+
         print('create')
 
     def populate_guest_info(self, i):
-        # Fills forms in guest field (ordered_widget)
+        ''' Fills forms in guest field (guest_info)'''
         guest = Guest()
         guest.fetch_by_id(self.db, i)
-        self.res_ordered.init_guest(guest)
+        self.guest_info.init_guest(guest)
         print('kaka')
 
     def search_guest_btn_clicked(self):
@@ -116,9 +124,9 @@ class ReservationEdit(QWidget):
 
     def choose_guest_on_click(self, int):
         '''Triggered by choose guest in search_btn_dialog'''
-        guest = Guest() # Init guest
-        guest.fetch_by_id(self.db, int) # Fetch from db
-        self.res_ordered.init_guest(guest) # Populate res_ordered widget
+        guest = Guest()  # Init guest
+        guest.fetch_by_id(self.db, int)  # Fetch from db
+        self.guest_info.init_guest(guest)  # Populate guest_info widget
 
     def check_obligatories(self):
 
