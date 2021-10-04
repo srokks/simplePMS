@@ -7,17 +7,18 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QCalendarWidget,
     QSizePolicy,
-QDateEdit,
+    QDateEdit,
 )
-from PyQt5.QtCore import QRegExp,pyqtSignal
-from PyQt5.QtGui import QRegExpValidator,QIntValidator
-from PyQt5.QtCore import Qt,QDate
+from PyQt5.QtCore import QRegExp, pyqtSignal
+from PyQt5.QtGui import QRegExpValidator, QIntValidator
+from PyQt5.QtCore import Qt, QDate
 from reservation.RoomingListWidget import RoomingListWidget
 from guest.Guest import Guest
+from reservation.Reservation import Reservation
 
 class ReservationDetailWidget(QWidget):
     guest_id_signal = pyqtSignal(int)
-    reservation_valid = pyqtSignal() # if all data res are valid
+    reservation_valid = pyqtSignal(bool)  # if all data res are valid
 
     def __init__(self):
         super(ReservationDetailWidget, self).__init__()
@@ -26,11 +27,9 @@ class ReservationDetailWidget(QWidget):
         form1 = QFormLayout()
         form1.setHorizontalSpacing(20)
 
-
         self.room_type_cmb = QComboBox()
         # TODO: load room_types from DB
         self.room_type_cmb.addItems(['SGL', 'DBL'])
-
 
         self.arrival_date = QDateEdit()
         self.arrival_date.setDate(QDate().currentDate())
@@ -63,13 +62,12 @@ class ReservationDetailWidget(QWidget):
 
         self.res_type_cmb = QComboBox()
         # TODO: load res_types from DB
-        self.res_type_cmb.addItems(["1.Guarantee",'2.Unguarantee','3.Option'])
+        self.res_type_cmb.addItems(["1.Guarantee", '2.Unguarantee', '3.Option'])
 
         form2.addRow("Room:", self.room)
         form2.addRow("Departure:", self.departure_date)
         form2.addRow("Reservation no.:", self.res_number)
         form2.addRow("Reservation type:", self.res_type_cmb)
-
 
         main_layout.addLayout(form1)
         main_layout.addLayout(form2)
@@ -77,35 +75,59 @@ class ReservationDetailWidget(QWidget):
         self.setLayout(main_layout)
         for el in self.findChildren(QLineEdit):
             el.textChanged.connect(self.check_obligatories)
-
-    def al(self,e:QDate):
+        self.night_recalculate()
+    def al(self, e: QDate):
         self.arrival_date.setText(e.toString(Qt.SystemLocaleShortDate))
         self.cal.close()
         pass
 
-    def departure_date_recalculate(self, e:str):
-        'Trigered by changing night value. Recalculate departure date and update it'
-        if e!='':
+    def departure_date_recalculate(self, e: str):
+        """Trigered by changing night value. Recalculate departure date and update it"""
+        if e != '':
             arival_date = self.arrival_date.date()
             departure_date = arival_date.addDays(int(e))
             self.departure_date.setDate(departure_date)
             self.nights.setStyleSheet('background-color:white')
-        elif e=='':
+        elif e == '':
             # self.night_recalculate(self.departure_date.date())
             self.nights.setStyleSheet('background-color:red')
+
     def check_obligatories(self):
-        self.reservation_valid.emit()
-    def night_recalculate(self,date):
-        'Trigered by changing departure value. Recalculate nigth value and update it'
+        """ Emit signal for if all entered data in form are valid"""
+        # TODO: check obligatories logic
+        if self.nights.text() == '':
+            self.reservation_valid.emit(True)
+        else:
+            self.reservation_valid.emit(False)
+
+    def night_recalculate(self):
+        """Trigered by changing departure value. Recalculate nigth value and update it"""
         self.nights.setText(str(self.arrival_date.date().daysTo(self.departure_date.date())))
-    def init_res_details(self,res):
-        self.reservation = res
-        self.room_type_cmb.setCurrentIndex(self.reservation.room_type)
-        self.guests_no.setText(str(self.reservation.guest_no))
-        self.arrival_date.setDate(self.reservation.date_from)
-        self.departure_date.setDate(self.reservation.date_to)
-        self.res_number.setText(self.reservation.booking_no)
-        self.room_no.setText(str(self.reservation.room_no))
-        self.guest_id_signal.emit(self.reservation.guest_id)# emits signal to catch by ordered widget
+
+    def init_res_details(self, res):
+        """ Populate form line edits with res date """
+        if res is None:
+            pass
+        else:
+            self.reservation = res
+            self.room_type_cmb.setCurrentIndex(self.reservation.room_type)
+            self.guests_no.setText(str(self.reservation.guest_no))
+            self.arrival_date.setDate(self.reservation.date_from)
+            self.departure_date.setDate(self.reservation.date_to)
+            self.res_number.setText(self.reservation.booking_no)
+            self.room_no.setText(str(self.reservation.room_no))
+            self.guest_id_signal.emit(self.reservation.guest_id)  # emits guest_id to catch by guest_info
+
     def gather_res_details(self):
-        pass
+        """Gathers all thing from form and returns as Reservation"""
+        res = Reservation()
+        # self.booking_no =
+        # self.guest_id = 3
+        res.date_from = self.arrival_date.date()
+        res.date_to = self.departure_date.date()
+        # self.room_no =
+        res.guest_no = self.guests_no.text()
+        res.booking_status_id = self.res_type_cmb.currentIndex()
+        res.room_type = self.room_type_cmb.currentIndex()
+        print('lsls')
+        return res
