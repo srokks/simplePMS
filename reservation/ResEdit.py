@@ -107,7 +107,6 @@ class ReservationEdit(QWidget):
         '''Checks if all things are filled and turn enable new_btn'''
         #TODO: somehow catch singals from two widgget and
         self.action_lay.new_res_btn.setDisabled(e)
-        print('sss')
 
     def new_res_btn_clicked(self):
         '''Triggered by new_bt, pushes reservation data into db'''
