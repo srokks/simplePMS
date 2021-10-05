@@ -19,13 +19,12 @@ from reservation.Reservation import Reservation
 
 class ReservationDetailWidget(QWidget):
     reservation_valid = pyqtSignal(bool)  # emits if all fields are valid
-
     def __init__(self):
         super(ReservationDetailWidget, self).__init__()
         main_layout = QHBoxLayout()
         form1 = QFormLayout()
         form1.setHorizontalSpacing(20)
-        #TODO:kupa
+        # -----
         self.room_type_cmb = QComboBox()
         # TODO: load room_types from DB
         self.room_type_cmb.addItems(['SGL', 'DBL'])

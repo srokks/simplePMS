@@ -43,6 +43,7 @@ from reservation.RoomingListWidget import RoomingListWidget
 
 
 class ReservationEdit(QWidget):
+    ''' Reservation Edit widget'''
     def __init__(self, parent=None, db=None, res=None):
         if db is None:  # if parent widget don't pass database
             self.db = Connection().db  # init new connection
@@ -65,19 +66,20 @@ class ReservationEdit(QWidget):
         # ----
 
         # --- Init main widgets
+        # --- Init main widgets
         self.res_details = ReservationDetailWidget()
         self.guest_info = ReservationOrderedWidget()
         rooming_list = RoomingListWidget()
         rooms_avel = ReservationAvelRooms()
         self.action_lay = ReservationActionLayout()
         # -----
-        self.res_details.guest_id_signal.connect(self.populate_guest_info) # catches guest_id signal and populate
         self.res_details.init_res_details(self.reservation) # inits res_details with reservation
-
+        self.guest_info.init_guest()
         self.action_lay.search_guest_btn.clicked.connect(self.search_guest_btn_clicked) # connect search_btn to popup window in MDI
         self.action_lay.new_res_btn.clicked.connect(self.new_res_btn_clicked) # connect event of pushing new reservation
         # -----
         tab = QTabWidget()
+        #TODO: fix mac os tab positioning
         tab.addTab(QPushButton(), "All reservations")
         tab.addTab(self.res_details, "Basic")
         tab.addTab(rooming_list, "Rooming List")
@@ -89,7 +91,6 @@ class ReservationEdit(QWidget):
         main_layout.addWidget(tab, 1, 0, 1, 3)
         main_layout.addLayout(self.action_lay, 0, 2, 3, 1)
         # -----
-        # res_details.guest_id_signal.connect(self.choose_guest_on_click) # catches if
         self.res_details.reservation_valid.connect(self.on_valid_reservation) # catches signal if form is valid filled
         # -----
         self.setLayout(main_layout)
