@@ -116,7 +116,6 @@ class ReservationDetailWidget(QWidget):
             self.departure_date.setDate(self.reservation.date_to)
             self.res_number.setText(self.reservation.booking_no)
             self.room_no.setText(str(self.reservation.room_no))
-            self.guest_id_signal.emit(self.reservation.guest_id)  # emits guest_id to catch by guest_info
 
     def gather_res_details(self):
         """Gathers all thing from form and returns as Reservation"""
