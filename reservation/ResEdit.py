@@ -73,8 +73,7 @@ class ReservationEdit(QWidget):
         rooms_avel = ReservationAvelRooms()
         self.action_lay = ReservationActionLayout()
         # -----
-        self.res_details.init_res_details(self.reservation) # inits res_details with reservation
-        self.guest_info.init_guest()
+        self.init_data()
         self.action_lay.search_guest_btn.clicked.connect(self.search_guest_btn_clicked) # connect search_btn to popup window in MDI
         self.action_lay.new_res_btn.clicked.connect(self.new_res_btn_clicked) # connect event of pushing new reservation
         # -----
@@ -92,10 +91,17 @@ class ReservationEdit(QWidget):
         main_layout.addLayout(self.action_lay, 0, 2, 3, 1)
         # -----
         self.res_details.reservation_valid.connect(self.on_valid_reservation) # catches signal if form is valid filled
+        self.res_details.reservation_valid.connect(self.on_valid_reservation) # catches signal if form is valid filled
         # -----
         self.setLayout(main_layout)
 
-
+    def init_data(self):
+        if self.reservation is None:
+            pass
+        else:
+            self.res_details.init_res_details(self.reservation)  # populate res_details
+            # inits res_details with reservation
+            self.populate_guest_info(self.reservation.guest_id)
 
     def on_valid_reservation(self, e):
         '''Checks if all things are filled and turn enable new_btn'''
