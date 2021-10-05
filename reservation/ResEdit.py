@@ -72,11 +72,10 @@ class ReservationEdit(QWidget):
         self.action_lay = ReservationActionLayout()
         # -----
         self.res_details.guest_id_signal.connect(self.populate_guest_info) # catches guest_id signal and populate
-
         self.res_details.init_res_details(self.reservation) # inits res_details with reservation
 
-        self.action_lay.search_guest_btn.clicked.connect(self.search_guest_btn_clicked) #
-        self.action_lay.new_res_btn.clicked.connect(self.new_res_btn_clicked)
+        self.action_lay.search_guest_btn.clicked.connect(self.search_guest_btn_clicked) # connect search_btn to popup window in MDI
+        self.action_lay.new_res_btn.clicked.connect(self.new_res_btn_clicked) # connect event of pushing new reservation
         # -----
         tab = QTabWidget()
         tab.addTab(QPushButton(), "All reservations")
@@ -98,11 +97,13 @@ class ReservationEdit(QWidget):
 
 
     def on_valid_reservation(self, e):
+        '''Checks if all things are filled and turn enable new_btn'''
+        #TODO: somehow catch singals from two widgget and
         self.action_lay.new_res_btn.setDisabled(e)
         print('sss')
 
     def new_res_btn_clicked(self):
-        '''Triggered by new_btn'''
+        '''Triggered by new_bt, pushes reservation data into db'''
         # TODO: insert to db logic
         self.reservation = self.res_details.gather_res_details()
 
@@ -111,26 +112,19 @@ class ReservationEdit(QWidget):
     def populate_guest_info(self, i):
         ''' Fills forms in guest field (guest_info)'''
         guest = Guest()
-        guest.fetch_by_id(self.db, i)
-        self.guest_info.init_guest(guest)
-        print('kaka')
+        guest.fetch_by_id(self.db, i) # fetch guest from db
+        self.guest_info.init_guest(guest) # populate guest_info
 
     def search_guest_btn_clicked(self):
         ''' Opens new sub window in parent MDI with search_guest window'''
         self._dialog = SearchGuest()
-        self.parent.addSubWindow(self._dialog)
-        self._dialog.chosen_guest.connect(self.choose_guest_on_click)
+        self.parent.addSubWindow(self._dialog) # adds to parent MDI new window
+        self._dialog.chosen_guest.connect(self.populate_guest_info) # signal passes choosen guest id
         self._dialog.show()
 
-    def choose_guest_on_click(self, int):
-        '''Triggered by choose guest in search_btn_dialog'''
-        guest = Guest()  # Init guest
-        guest.fetch_by_id(self.db, int)  # Fetch from db
-        self.guest_info.init_guest(guest)  # Populate guest_info widget
 
-    def check_obligatories(self):
 
-        pass
+
 
 
 class MainWindow(QWidget):

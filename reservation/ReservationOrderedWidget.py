@@ -82,7 +82,10 @@ class ReservationOrderedWidget(QWidget):
         form_lay.setFieldGrowthPolicy(form_lay.ExpandingFieldsGrow)
         self.setLayout(main_layout)
         self.init_guest(self.guest)
-
+        for obj in form_lay.findChildren(QLineEdit):
+            obj.textchanged.connect(self.on_text_change)
+    def on_text_change(self):
+        print('change')
     def init_guest(self, guest):
         'in case of passed guest_id_signal from parent widget fuction sets text in line edits'
         if guest is None:
