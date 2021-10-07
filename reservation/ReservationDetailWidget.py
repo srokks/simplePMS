@@ -18,7 +18,8 @@ from reservation.Reservation import Reservation
 
 
 class ReservationDetailWidget(QWidget):
-    reservation_valid = pyqtSignal(bool)  # emits if all fields are valid
+    reservation_inited = pyqtSignal(bool)  # emits if all fields are valid
+    reservation_valid = False # hold state of reservation
     def __init__(self):
         super(ReservationDetailWidget, self).__init__()
         main_layout = QHBoxLayout()
@@ -35,13 +36,15 @@ class ReservationDetailWidget(QWidget):
         self.arrival_date.dateChanged.connect(self.night_recalculate)  # recalculate night if date changed
         # -----
         self.nights = QLineEdit()
-        val = QIntValidator()  # allow only ints
+        val = QIntValidator(0,99)  # allow only ints
         self.nights.setValidator(val)
         self.nights.textChanged.connect(self.departure_date_recalculate)  # recalculate departure date if changed
         # -----
         self.room_no = QLineEdit()
+        self.room_no.setValidator(val)
         # -----
         self.guests_no = QLineEdit()
+        self.guests_no.setValidator(val)
         # -----
         form1.addRow("Room category:", self.room_type_cmb)
         form1.addRow("Arrival:", self.arrival_date)
@@ -61,6 +64,7 @@ class ReservationDetailWidget(QWidget):
         self.room = QLineEdit()
         # -----
         self.res_number = QLineEdit()
+        self.res_number.setDisabled(True)
         # -----
         self.res_type_cmb = QComboBox()
         self.res_type_cmb.addItems(["1.Guarantee", '2.Unguarantee', '3.Option'])
@@ -77,7 +81,8 @@ class ReservationDetailWidget(QWidget):
         self.setLayout(main_layout)
         # -----
         for el in self.findChildren(QLineEdit):
-            el.textChanged.connect(self.check_obligatories)
+            el.textEdited.connect(self.check_obligatories)
+
         # -----
         self.night_recalculate()
 
@@ -95,13 +100,22 @@ class ReservationDetailWidget(QWidget):
     def check_obligatories(self):
         """ Emit signal for if all entered data in form are valid"""
         # TODO: check obligatories logic
-        if self.nights.text() == '':
-            self.reservation_valid.emit(True)
-        else:
-            self.reservation_valid.emit(False)
+        "do sprawdzenia" \
+        "1.nigts>0" \
+        "2.no of rooms >0 and no of guest"
+        if self.nights.hasAcceptableInput() and self.room_no.hasAcceptableInput() and self.guests_no.hasAcceptableInput():
+            self.reservation_valid = True
+            self.reservation_inited.emit(True)
+
+        if self.sender().hasAcceptableInput(): # check if sender has acceptable input
+            self.sender().setStyleSheet('background-color:white')
+        elif self.sender().text() == '': # if sender text is empty
+            self.sender().setStyleSheet('background-color:red') # turn bcg color to red
 
     def night_recalculate(self):
-        """Trigered by changing departure value. Recalculate nigth value and update it"""
+        """Trigered by changing arrival/departure value. Recalculate nigth value and update it
+        Also check if arrival date < departure date """
+        self.departure_date.setMinimumDate(self.arrival_date.date())
         self.nights.setText(str(self.arrival_date.date().daysTo(self.departure_date.date())))
 
     def init_res_details(self, res):
