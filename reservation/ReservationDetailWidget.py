@@ -92,21 +92,13 @@ class ReservationDetailWidget(QWidget):
             arival_date = self.arrival_date.date()
             departure_date = arival_date.addDays(int(e))
             self.departure_date.setDate(departure_date)
-            self.nights.setStyleSheet('background-color:white')
-        elif e == '':
-            # self.night_recalculate(self.departure_date.date())
-            self.nights.setStyleSheet('background-color:red')
 
     def check_obligatories(self):
         """ Emit signal for if all entered data in form are valid"""
-        # TODO: check obligatories logic
-        "do sprawdzenia" \
-        "1.nigts>0" \
-        "2.no of rooms >0 and no of guest"
         if self.nights.hasAcceptableInput() and self.room_no.hasAcceptableInput() and self.guests_no.hasAcceptableInput():
             self.reservation_valid = True
             self.reservation_inited.emit(True)
-
+        # Logic for turning unfilled field to red
         if self.sender().hasAcceptableInput(): # check if sender has acceptable input
             self.sender().setStyleSheet('background-color:white')
         elif self.sender().text() == '': # if sender text is empty
