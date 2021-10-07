@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QRect, QSize
+from PyQt5.QtCore import Qt, QRect, QSize,pyqtSignal
 from PyQt5.QtGui import QPainter, QColor, QPen, QPainterPath
 from PyQt5.QtSql import QSqlRelationalTableModel, QSqlQuery
 from PyQt5.QtWidgets import (
@@ -12,9 +12,14 @@ from PyQt5.QtWidgets import (
 
 from db.Connection import Connection
 from guest.Guest import Guest
+class LineEdit(QLineEdit):
+    def __init__(self):
+        super(LineEdit, self).__init__()
+
 
 class ReservationOrderedWidget(QWidget):
-    is_completer = False
+    guest_inited = pyqtSignal(bool)
+    guest_valid = False
     def __init__(self, parent=None, db=None,guest = None):
         if db is None:  # if parent widget don't pass database
             self.db = Connection().db  # init new connection
@@ -60,7 +65,7 @@ class ReservationOrderedWidget(QWidget):
         count_pstcd_cty.addWidget(self.city_le)
 
 
-        self.first_name_le = QLineEdit()
+        self.first_name_le = LineEdit()
         self.last_name_le = QLineEdit()
         self.street_le = QLineEdit()
         self.phone_le = QLineEdit()
@@ -84,6 +89,7 @@ class ReservationOrderedWidget(QWidget):
         self.init_guest(self.guest)
         for obj in form_lay.findChildren(QLineEdit):
             obj.textchanged.connect(self.on_text_change)
+
     def on_text_change(self):
         print('change')
     def init_guest(self, guest):
@@ -101,7 +107,8 @@ class ReservationOrderedWidget(QWidget):
             self.city_le.setText(guest.city)
             self.country_le.setText(guest.country)
             self.post_code.setText(guest.zip_code)
-
+            self.guest_valid=True
+            self.guest_inited.emit(True)
 
 
 
