@@ -90,8 +90,8 @@ class ReservationEdit(QWidget):
         main_layout.addWidget(tab, 1, 0, 1, 3)
         main_layout.addLayout(self.action_lay, 0, 2, 3, 1)
         # -----
-        self.res_details.reservation_valid.connect(self.on_valid_reservation) # catches signal if form is valid filled
-        self.res_details.reservation_valid.connect(self.on_valid_reservation) # catches signal if form is valid filled
+        self.res_details.reservation_inited.connect(self.on_valid_reservation) # catches signal if form is valid filled
+        self.guest_info.guest_inited.connect(self.on_valid_reservation) # catches signal if form is valid filled
         # -----
         self.setLayout(main_layout)
 
@@ -103,11 +103,13 @@ class ReservationEdit(QWidget):
             # inits res_details with reservation
             self.populate_guest_info(self.reservation.guest_id)
 
-    def on_valid_reservation(self, e):
+    def on_valid_reservation(self):
         '''Checks if all things are filled and turn enable new_btn'''
-        #TODO: somehow catch singals from two widgget and
-        self.action_lay.new_res_btn.setDisabled(e)
-
+        # print('res_edit ',self.res_details.reservation_valid,'|','guest_info ',self.guest_info.guest_valid,'|') #DEBUG: state of two factors of reservation
+        if self.res_details.reservation_valid and self.guest_info.guest_valid: # if res_details all filled and guest filled
+            self.action_lay.new_res_btn.setDisabled(False) # turn on new_res_btn
+        else:
+            self.action_lay.new_res_btn.setDisabled(True) # turn off button
     def new_res_btn_clicked(self):
         '''Triggered by new_bt, pushes reservation data into db'''
         # TODO: insert to db logic
