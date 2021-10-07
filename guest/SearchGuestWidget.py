@@ -116,6 +116,8 @@ class SearchGuest(QWidget):
     def choose_btn_clicked(self):
         #int(self.model.index(self.guest_table.currentIndex().row(),0).data())
         self.chosen_guest.emit(int(self.model.index(self.guest_table.currentIndex().row(),0).data()))
+        if self.db.isOpen():
+            self.db.close() # close connection to no interfere with other widgets
         self.parent().close()
     def guest_selected(self,e):
         self.search_line_layout.choose_btn.setDisabled(False)
