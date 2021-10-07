@@ -97,6 +97,7 @@ class ReservationOrderedWidget(QWidget):
         if guest is None:
             pass
         else:
+            self.guest = guest
             self.gender_cmb.setCurrentIndex(guest.gender+1)
             self.guest_type_cmb.setCurrentIndex(guest.type+1)
             self.first_name_le.setText(guest.first_name)
