@@ -130,7 +130,7 @@ class ReservationDetailWidget(QWidget):
         # self.guest_id = 3
         res.date_from = self.arrival_date.date()
         res.date_to = self.departure_date.date()
-        # self.room_no =
+        self.room_no = self.room_no.text()
         res.guest_no = self.guests_no.text()
         res.booking_status_id = self.res_type_cmb.currentIndex()
         res.room_type = self.room_type_cmb.currentIndex()

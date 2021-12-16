@@ -41,12 +41,33 @@ from reservation.ReservationOrderedWidget import ReservationOrderedWidget
 from reservation.ReservationActionLayout import ReservationActionLayout
 from reservation.RoomingListWidget import RoomingListWidget
 
-class RoomSearch(QWidget):
-    def __init__(self):
-        super(RoomSearch, self).__init__()
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(QPushButton())
-        self.setLayout(main_layout)
+
+class guestCompleter(QWidget):
+    def __init__(self,db=None,strName=''):
+        super(guestCompleter, self).__init__()
+        if db==None:
+            self.db = Connection().db
+        else:
+            self.db = db
+        main_lay = QVBoxLayout()
+        strName.split(',')
+
+        model = QSqlRelationalTableModel()
+        tab = QTableView()
+        tab.setModel(model)
+        query = QSqlQuery(db=self.db)
+        query.prepare(
+            "SELECT gGuestID,gFirstName,gLastName ,aCity,gPhoneNumber,gMailAddress FROM tblGuest "
+            "LEFT OUTER JOIN tblAddresses ON tblGuest.gAddressID = tblAddresses.aAddressID "
+            "WHERE "
+            "gLastName LIKE '%' || :last_name || '%' AND "
+            "gFirstName LIKE '%' || :first_name || '%' AND "
+            "aCity LIKE '%' || :city || '%'"
+
+        )
+        main_lay.addWidget(tab)
+        self.setLayout(main_lay)
+
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -54,13 +75,12 @@ class MainWindow(QWidget):
         lay = QVBoxLayout()
         self.mdi_area = QMdiArea()
 
-
-        self.mdi_area.addSubWindow(QPushButton())
+        self.mdi_area.addSubWindow(guestCompleter())
 
         lay.addWidget(self.mdi_area)
         self.setLayout(lay)
 
-
+2
 if __name__ == "__main__":
     import sys
 

@@ -113,9 +113,13 @@ class ReservationEdit(QWidget):
     def new_res_btn_clicked(self):
         '''Triggered by new_bt, pushes reservation data into db'''
         # TODO: insert to db logic
-        self.reservation = self.res_details.gather_res_details()
+        self.reservation = self.res_details.gather_res_details() # gather info from res_edit
+        self.reservation.guest_id = self.guest_info.guest.guest_id
 
-        print('create')
+        if self.reservation.insert(self.db):
+            self.res_details.res_number.setText(self.reservation.booking_no)
+        else:
+            print('res not created')
 
     def populate_guest_info(self, i):
         ''' Fills forms in guest field (guest_info)'''
